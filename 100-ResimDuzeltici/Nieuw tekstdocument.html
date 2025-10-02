@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Foto achtergrond verwijderen & downloaden (client-side)</title>
+<style>
+  :root{
+    --page-bg: #ffffff;
+    --page-text: #111111;
+    --panel-bg: #fafafa;
+    --panel-border: #ddd;
+    --muted: #666666;
+    --control-bg: #fff;
+    --primary: #0b76ef;
+    --primary-contrast: #ffffff;
+    --accent: #f5a623;
+    --icon-color: #0b76ef; /* <<< NIEUW voor iconen */
+  }
+
+  body { font-family: system-ui; margin:20px; background:var(--page-bg); color:var(--page-text); }
+  h1 { font-size:20px; color:var(--page-text); }
+  .layout { display:flex; flex-wrap:wrap; gap:20px; }
+
+  .panel { border:1px solid var(--panel-border); border-radius:8px; background:var(--panel-bg); padding:12px; }
+  canvas { max-width:100%; border:1px solid #ccc; display:block; margin:auto; }
+
+  button { margin-top:10px; padding:8px 12px; border-radius:6px; cursor:pointer; }
+  .btn-primary { background:var(--primary); color:var(--primary-contrast); border:none; }
+  .icon { width:24px; height:24px; fill:var(--icon-color); color:var(--icon-color); } /* <<< icon kleur */
+
+  .theme-controls { display:flex; flex-direction:column; gap:8px; }
+  .theme-row { display:flex; gap:8px; align-items:center; }
+  .theme-label { font-size:12px; min-width:120px; }
+  .theme-row input[type="color"]{ width:40px; height:28px; border:1px solid #ccc; border-radius:6px; }
+
+</style>
+</head>
+<body>
+  <h1>Turis Tv</h1>
+  <div class="layout">
+    <div class="panel">
+      <canvas id="photoCanvas" width="600" height="400"></canvas>
+      <div class="icon-row">
+        <!-- Voorbeeld iconen -->
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2L15 8H9L12 2zM12 22l-3-6h6l-3 6zM2 12l6 3V9l-6 3zm20 0l-6-3v6l6-3z"/></svg>
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+        <span class="icon">★</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <label>Interface kleuren</label>
+      <div class="theme-controls">
+        <div class="theme-row"><span class="theme-label">Achtergrond</span><input type="color" id="colorPageBg" value="#ffffff"></div>
+        <div class="theme-row"><span class="theme-label">Paneel achtergrond</span><input type="color" id="colorPanelBg" value="#fafafa"></div>
+        <div class="theme-row"><span class="theme-label">Primaire knop</span><input type="color" id="colorPrimary" value="#0b76ef"></div>
+        <div class="theme-row"><span class="theme-label">Tekst kleur</span><input type="color" id="colorText" value="#111111"></div>
+        <div class="theme-row"><span class="theme-label">Accent</span><input type="color" id="colorAccent" value="#f5a623"></div>
+        <div class="theme-row"><span class="theme-label">Icoon kleur</span><input type="color" id="colorIcon" value="#0b76ef"></div> <!-- <<< NIEUW -->
+        <button id="resetThemeBtn">Reset thema</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const colorPageBg = document.getElementById('colorPageBg');
+const colorPanelBg = document.getElementById('colorPanelBg');
+const colorPrimary = document.getElementById('colorPrimary');
+const colorText = document.getElementById('colorText');
+const colorAccent = document.getElementById('colorAccent');
+const colorIcon = document.getElementById('colorIcon'); // <<<
+
+const resetThemeBtn = document.getElementById('resetThemeBtn');
+
+const defaults = {
+  pageBg: '#ffffff',
+  panelBg: '#fafafa',
+  primary: '#0b76ef',
+  text: '#111111',
+  accent: '#f5a623',
+  icon: '#0b76ef'
+};
+
+function applyTheme(t){
+  const root = document.documentElement.style;
+  root.setProperty('--page-bg', t.pageBg);
+  root.setProperty('--panel-bg', t.panelBg);
+  root.setProperty('--primary', t.primary);
+  root.setProperty('--primary-contrast', getContrast(t.primary));
+  root.setProperty('--page-text', t.text);
+  root.setProperty('--accent', t.accent);
+  root.setProperty('--icon-color', t.icon); // <<< icoon
+}
+
+function getContrast(hex){
+  const h=hex.replace('#',''); const r=parseInt(h.substr(0,2),16);
+  const g=parseInt(h.substr(2,2),16); const b=parseInt(h.substr(4,2),16);
+  return ((r*299+g*587+b*114)/1000 >=128) ? '#111' : '#fff';
+}
+
+function updateTheme(){
+  applyTheme({
+    pageBg: colorPageBg.value,
+    panelBg: colorPanelBg.value,
+    primary: colorPrimary.value,
+    text: colorText.value,
+    accent: colorAccent.value,
+    icon: colorIcon.value
+  });
+}
+
+[colorPageBg,colorPanelBg,colorPrimary,colorText,colorAccent,colorIcon]
+  .forEach(inp=>inp.addEventListener('input', updateTheme));
+
+resetThemeBtn.addEventListener('click', ()=>{
+  Object.entries(defaults).forEach(([k,v])=>{
+    document.getElementById('color'+k.charAt(0).toUpperCase()+k.slice(1)).value = v;
+  });
+  applyTheme(defaults);
+});
+
+applyTheme(defaults);
+</script>
+</body>
+</html>

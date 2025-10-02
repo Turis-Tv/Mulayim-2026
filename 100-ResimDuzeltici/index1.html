@@ -1,0 +1,387 @@
+<!DOCTYPE html><html lang="nl"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Live-Demonstratie</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    body {
+        width: 1280px;
+        height: 720px;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .slide-container {
+        width: 1280px;
+        height: 720px;
+        position: relative;
+        overflow: hidden;
+    }
+    .filter-control {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+    .filter-label {
+        width: 70px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    .filter-value {
+        width: 40px;
+        text-align: right;
+        margin-left: 5px;
+        font-size: 12px;
+    }
+    .code-block {
+        font-family: monospace;
+        font-size: 11px;
+        padding: 6px;
+        border-radius: 4px;
+        max-height: 50px;
+        overflow: auto;
+    }
+    .bg-gradient {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    }
+</style>
+</head>
+<body>
+<div class="slide-container bg-gradient" style="background-image: url(&#39;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSgxMzUpIj48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykyMjIiPjwvcmVjdD48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjcGF0dGVybikiPjwvcmVjdD48L3N2Zz4=&#39;);">
+
+<!-- Header -->
+<header class="p-4">
+    <h1 class="text-3xl font-bold text-white">Live-Demonstratie</h1>
+    <div class="w-20 h-1 bg-white mt-1"></div>
+</header>
+
+<!-- Main Content -->
+<div class="grid grid-cols-12 gap-3 px-4">
+    <!-- Left Column - Image and Controls -->
+    <div class="col-span-7">
+        <div class="bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg">
+            <h2 class="text-lg font-semibold mb-2 text-gray-700">Afbeelding Bewerken</h2>
+            
+            <!-- Upload and Image Container -->
+            <div class="flex space-x-4 mb-3">
+                <!-- Upload Button -->
+                <div class="flex-shrink-0">
+                    <label class="flex flex-col items-center justify-center w-28 h-28 bg-blue-500 text-white rounded cursor-pointer hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-upload text-2xl mb-1"></i>
+                        <span class="text-xs text-center px-1">Afbeelding uploaden</span>
+                        <input type="file" id="image-upload" class="hidden" accept="image/*"/>
+                    </label>
+                </div>
+                
+                <!-- Image Preview -->
+                <div class="flex-grow relative flex items-center justify-center bg-gray-200 bg-opacity-50 rounded-lg h-28">
+                    <img id="preview-image" alt="Transparante afbeelding" class="max-h-full max-w-full object-contain" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAAsTAAALEwEAmpwYAAAFF0lEQVR4nO2dTYhVVRiGz5l7zcw0ozN3RligMbYQgiFokVEELfpRiDYtW7TJTcgEbYOgXZt2IURBELUJjBYFgYv+IL/QSs0ap9GxISedUScbZLCZc+KM2NzOnO9+5/z8Ps/q3DvnfN97v3vf73vPvTpHBAAAAAAAAAAAAAAAAAAAAACAuMZ0oSkRkaZMsdEi0snlfDGhlizEdNz5RiTrgjh6iPT83KY/I+I6f4w+LUaSMU3HqjnfhVy/MuG5HWrK8/M/EhT0gvRxzEuLIiXp5QX9qfOpt5BbqM5XP/VyATCrfylXcQcuzflzoJsrLgVwYdII5LYdHrOYXQLc47Gsfa0FQDK5CcgVsXIBmW5dnwJXR1HnqzkLwLQ+VUII/+e2xsv7wXNWUJ4ClaZKEr0JnIq+LSzT9DLT+eV64RiiTYMQm8CiCMyc73IueqZ0GgHGmaCa83UbwTquBzCdz0rGijSdjZ4tnbqvXBNnOb/aBLAfvHqrhpuyoovdDN4xnre+mhVbysZOoTqffYkETeBUWO4rN4E5m0D1BVBzPnOeKOt3UDDG9c2b5bBSE6gxAU0ZYwInilKvCdRY+LROgdm/h5z9OqxjE5gvEvnha0UDzJaRyyHXLzXHLVTnMxOULXr/7XxqZbETkEwaQXaBrGMb0Jf19zqkdR9AtegzE7CtrONVwELU+dyPc7kCGSMFDIaVMczGlC22ShNXtrrqvHbRK3053imQVdKw+/BYE1j+QouxHiB3fsm5YCeAfi34WcfbwgvF+S5z8nVafBWHc5s47VhWqgUQTsdrovRLXdl44VuM+CGQaVgxhPrBcz4HPjXoFLjyuxNWYqlvuo77wVOnwLX9Zr3FXMf+IxWNLr5KnDGWv9DWY36IljlR/hP5ryMR5qXBdGYIWvXZGF0nnOndUAY01MJvobpfOkzedlM+Zlir8Koy0eqCw8juvHsh8qtopRDipwdKnVEteuUgdJ2/Srya45gJWJnoBh6nEwsNGlBrZkKzcZhtOTvbdv7gZeYjnKbCtfApvxHwTnXO+ciaxvj1haRMs1uesYx8dwJr4ZcqfNrt4qCeT/uUesS6OHxuAln3Fl3H6YF5CVRq4t4/A1MmlLjTwJmw1ppW524CJxtUfRnSmgCiD9Z8wLz60Pg62FqFr9pYaJ8CmSugWgIshdwGDfOnyuaWxxmE2QSWmUbWxzGWQnbD9Ncium/4+wtgwXBLp+Z2ZrpY1QVXdQIsI6y4Ck/MLl3mi6L7YdlDkbVvMImk9eT5oa56tnBc4JXOLZfppfarSNUslXHuMNsOlP6T/rEu1Od3WItapfGdzi6Xea3WSeNEoZ4K6w5C1gkrOlGZHv4HkYozAbfp1O7KublJ4yrx1mkwXTq1mci4N1unUxpX7d1Uw3XulV+l6dT+iFsnDJm9djeLUPG3NB+ejbE+LauMGyOsnStPzPrKXLg/CeoeWsREZB+/+uhErU8NMZ3POI2qQb+axfvweS+JrNJZCfiR/+BHzt+MS+dWM2iVcOZYnA+f9+FZhbUZt4uXThu/uaYa6Rqh7H5g9gX9fGnTrNIHWD/vwB1yWzprvlXLEzDvCDqxZuDX7LpynjLMYrUw8SLgffjMhFTb0vdCwx/MRtu/BX8qoJB59i0RcimtoTq48ykEFJE1HWkXH5EBneM5/Kc+Eh02+NMJIPL+MAt0VzevoePwi9S7wcHtWwAAAAAAAAAAAAAAAAAAAAAAAICc/AOum5HpkdfRtgAAAABJRU5ErkJggg==" style="filter: hue-rotate(0deg) saturate(100%) brightness(100%) contrast(100%) blur(0px) sepia(0%) invert(0%);"/>
+                    <div id="image-placeholder" class="absolute inset-0 flex items-center justify-center">
+                        <span class="text-xs text-gray-500">Upload afbeelding</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filter Controls - 2 columns -->
+            <div class="grid grid-cols-2 gap-x-2 gap-y-1 mb-2">
+                <div class="filter-control">
+                    <span class="filter-label">Kleurtoon:</span>
+                    <input class="w-full h-4" id="hue" max="360" min="0" type="range" value="0"/>
+                    <span class="filter-value">0°</span>
+                </div>
+                <div class="filter-control">
+                    <span class="filter-label">Verzadiging:</span>
+                    <input class="w-full h-4" id="saturate" max="200" min="0" type="range" value="100"/>
+                    <span class="filter-value">100%</span>
+                </div>
+                <div class="filter-control">
+                    <span class="filter-label">Helderheid:</span>
+                    <input class="w-full h-4" id="brightness" max="200" min="0" type="range" value="100"/>
+                    <span class="filter-value">100%</span>
+                </div>
+                <div class="filter-control">
+                    <span class="filter-label">Contrast:</span>
+                    <input class="w-full h-4" id="contrast" max="200" min="0" type="range" value="100"/>
+                    <span class="filter-value">100%</span>
+                </div>
+                <div class="filter-control">
+                    <span class="filter-label">Vervaging:</span>
+                    <input class="w-full h-4" id="blur" max="10" min="0" step="0.1" type="range" value="0"/>
+                    <span class="filter-value">0px</span>
+                </div>
+                <div class="filter-control">
+                    <span class="filter-label">Sepia:</span>
+                    <input class="w-full h-4" id="sepia" max="100" min="0" type="range" value="0"/>
+                    <span class="filter-value">0%</span>
+                </div>
+                <div class="filter-control">
+                    <span class="filter-label">Inversie:</span>
+                    <input class="w-full h-4" id="invert" max="100" min="0" type="range" value="0"/>
+                    <span class="filter-value">0%</span>
+                </div>
+            </div>
+            
+            <!-- Effect Presets and Filter String -->
+            <div class="mb-2">
+                <p class="text-xs text-gray-500 mb-1">Effect presets:</p>
+                <div class="flex flex-wrap gap-1 mb-2">
+                    <button class="preset-button px-2 py-0.5 bg-gray-200 text-xs rounded hover:bg-gray-300" data-preset="sepia">Sepia</button>
+                    <button class="preset-button px-2 py-0.5 bg-gray-200 text-xs rounded hover:bg-gray-300" data-preset="vintage">Vintage</button>
+                    <button class="preset-button px-2 py-0.5 bg-gray-200 text-xs rounded hover:bg-gray-300" data-preset="invert">Inverteer</button>
+                    <button class="preset-button px-2 py-0.5 bg-gray-200 text-xs rounded hover:bg-gray-300" data-preset="grayscale">Grijstinten</button>
+                    <button class="preset-button px-2 py-0.5 bg-gray-200 text-xs rounded hover:bg-gray-300" data-preset="intense">Intens</button>
+                    <button class="preset-button px-2 py-0.5 bg-gray-200 text-xs rounded hover:bg-gray-300" data-preset="reset">Reset</button>
+                </div>
+                <p class="text-xs text-gray-500 mb-1">Huidige filter:</p>
+                <div class="code-block bg-gray-100 text-gray-700" id="filter-string">
+                    filter: hue-rotate(0deg) saturate(100%) brightness(100%) contrast(100%) blur(0px) sepia(0%) invert(0%);
+                </div>
+            </div>
+            
+            <!-- Download Button -->
+            <button class="w-full py-2 px-4 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors" id="download-button">
+                <i class="fas fa-download mr-1"></i> Download bewerkte afbeelding
+            </button>
+        </div>
+    </div>
+    
+    <!-- Right Column - HTML Example -->
+    <div class="col-span-5">
+        <div class="bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg h-full flex flex-col">
+            <h2 class="text-lg font-semibold mb-2 text-gray-700">HTML Voorbeeld</h2>
+            
+            <!-- HTML Code -->
+            <div class="mb-2 overflow-auto flex-grow">
+                <pre class="text-[10px] text-gray-600 bg-gray-100 p-2 rounded h-full overflow-auto">&lt;!-- HTML voor afbeelding bewerken met behoud van transparantie --&gt;
+&lt;div class=&#34;image-editor&#34;&gt;
+  &lt;!-- Upload knop --&gt;
+  &lt;label class=&#34;upload-button&#34;&gt;
+    &lt;i class=&#34;fas fa-upload&#34;&gt;&lt;/i&gt; Afbeelding uploaden
+    &lt;input type=&#34;file&#34; id=&#34;image-upload&#34; accept=&#34;image/*&#34; /&gt;
+  &lt;/label&gt;
+  
+  &lt;!-- Afbeelding weergave --&gt;
+  &lt;div class=&#34;image-container&#34;&gt;
+    &lt;img id=&#34;preview-image&#34; alt=&#34;Transparante afbeelding&#34; /&gt;
+  &lt;/div&gt;
+  
+  &lt;!-- Filters --&gt;
+  &lt;div class=&#34;filter-controls&#34;&gt;
+    &lt;div class=&#34;filter-control&#34;&gt;
+      &lt;span&gt;Kleurtoon:&lt;/span&gt;
+      &lt;input id=&#34;hue&#34; type=&#34;range&#34; min=&#34;0&#34; max=&#34;360&#34; value=&#34;0&#34; /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  
+  &lt;!-- Download knop --&gt;
+  &lt;button id=&#34;download-button&#34; class=&#34;download-button&#34;&gt;
+    &lt;i class=&#34;fas fa-download&#34;&gt;&lt;/i&gt; Download afbeelding
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
+            </div>
+            
+            <!-- JavaScript Code -->
+            <div class="mt-auto">
+                <p class="text-xs text-gray-500">JavaScript Code:</p>
+                <pre class="text-[10px] text-gray-600 bg-gray-100 p-2 rounded h-20 overflow-auto">// JavaScript voor afbeeldingsbewerking
+document.getElementById(&#39;image-upload&#39;).onchange = function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById(&#39;preview-image&#39;).src = e.target.result;
+      document.getElementById(&#39;image-placeholder&#39;).style.display = &#39;none&#39;;
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+// Filter toepassen
+function updateFilters() {
+  const hue = document.getElementById(&#39;hue&#39;).value;
+  const saturate = document.getElementById(&#39;saturate&#39;).value;
+  // ... andere filter waardes ...
+  
+  document.getElementById(&#39;preview-image&#39;).style.filter = 
+    `hue-rotate(${hue}deg) saturate(${saturate}%)`;
+}
+
+// Download met transparantie behouden
+document.getElementById(&#39;download-button&#39;).onclick = function() {
+  const img = document.getElementById(&#39;preview-image&#39;);
+  const canvas = document.createElement(&#39;canvas&#39;);
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  
+  const ctx = canvas.getContext(&#39;2d&#39;);
+  ctx.drawImage(img, 0, 0);
+  
+  const link = document.createElement(&#39;a&#39;);
+  link.href = canvas.toDataURL(&#39;image/png&#39;);
+  link.download = &#39;bewerkte_afbeelding.png&#39;;
+  link.click();
+};</pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="absolute bottom-2 right-4 text-sm text-white">
+    <p>8 / 8</p>
+</footer>
+
+<script>
+    // Handle image upload
+    document.getElementById('image-upload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview-image').src = e.target.result;
+                document.getElementById('image-placeholder').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Update filter values and display
+    function updateFilters() {
+        const hue = document.getElementById('hue').value;
+        const saturate = document.getElementById('saturate').value;
+        const brightness = document.getElementById('brightness').value;
+        const contrast = document.getElementById('contrast').value;
+        const blur = document.getElementById('blur').value;
+        const sepia = document.getElementById('sepia').value;
+        const invert = document.getElementById('invert').value;
+        
+        // Update the filter string
+        const filterString = `hue-rotate(${hue}deg) saturate(${saturate}%) brightness(${brightness}%) contrast(${contrast}%) blur(${blur}px) sepia(${sepia}%) invert(${invert}%)`;
+        
+        // Apply filters to image
+        document.getElementById('preview-image').style.filter = filterString;
+        
+        // Update filter string display
+        document.getElementById('filter-string').textContent = `filter: ${filterString};`;
+        
+        // Update value displays
+        document.querySelectorAll('.filter-value').forEach((el, i) => {
+            const values = [hue + '°', saturate + '%', brightness + '%', contrast + '%', blur + 'px', sepia + '%', invert + '%'];
+            el.textContent = values[i];
+        });
+    }
+    
+    // Setup event listeners
+    document.addEventListener('input', updateFilters);
+    
+    // Apply preset effects
+    document.querySelectorAll('.preset-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const preset = this.dataset.preset;
+            const hueInput = document.getElementById('hue');
+            const satInput = document.getElementById('saturate');
+            const brightInput = document.getElementById('brightness');
+            const contrastInput = document.getElementById('contrast');
+            const blurInput = document.getElementById('blur');
+            const sepiaInput = document.getElementById('sepia');
+            const invertInput = document.getElementById('invert');
+            
+            switch(preset) {
+                case 'sepia':
+                    hueInput.value = 30;
+                    satInput.value = 120;
+                    brightInput.value = 105;
+                    contrastInput.value = 110;
+                    blurInput.value = 0;
+                    sepiaInput.value = 70;
+                    invertInput.value = 0;
+                    break;
+                case 'vintage':
+                    hueInput.value = 330;
+                    satInput.value = 80;
+                    brightInput.value = 90;
+                    contrastInput.value = 120;
+                    blurInput.value = 0;
+                    sepiaInput.value = 30;
+                    invertInput.value = 0;
+                    break;
+                case 'invert':
+                    hueInput.value = 180;
+                    satInput.value = 100;
+                    brightInput.value = 100;
+                    contrastInput.value = 100;
+                    blurInput.value = 0;
+                    sepiaInput.value = 0;
+                    invertInput.value = 100;
+                    break;
+                case 'grayscale':
+                    hueInput.value = 0;
+                    satInput.value = 0;
+                    brightInput.value = 100;
+                    contrastInput.value = 120;
+                    blurInput.value = 0;
+                    sepiaInput.value = 0;
+                    invertInput.value = 0;
+                    break;
+                case 'intense':
+                    hueInput.value = 0;
+                    satInput.value = 150;
+                    brightInput.value = 110;
+                    contrastInput.value = 130;
+                    blurInput.value = 0;
+                    sepiaInput.value = 0;
+                    invertInput.value = 0;
+                    break;
+                case 'reset':
+                    hueInput.value = 0;
+                    satInput.value = 100;
+                    brightInput.value = 100;
+                    contrastInput.value = 100;
+                    blurInput.value = 0;
+                    sepiaInput.value = 0;
+                    invertInput.value = 0;
+                    break;
+            }
+            
+            updateFilters();
+        });
+    });
+    
+    // Download functionality
+    document.getElementById('download-button').addEventListener('click', () => {
+        const img = document.getElementById('preview-image');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas dimensions
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        
+        // Apply the filters to the canvas context
+        const computedStyle = window.getComputedStyle(img);
+        const filterValue = computedStyle.getPropertyValue('filter');
+        ctx.filter = filterValue;
+        
+        // Draw image on canvas
+        ctx.drawImage(img, 0, 0);
+        
+        // Get the data URL
+        const dataURL = canvas.toDataURL('image/png');
+        
+        // Create download link
+        const link = document.createElement('a');
+        link.href = dataURL;
+        link.download = 'bewerkte_afbeelding.png';
+        
+        // Add link to DOM and trigger download
+        document.body.appendChild(link);
+        link.click();
+        
+        // Remove link from DOM
+        document.body.removeChild(link);
+    });
+</script>
+</div>
+</body></html>
