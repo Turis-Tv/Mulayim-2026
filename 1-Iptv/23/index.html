@@ -3,78 +3,166 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mediaplayer Mobiel Actief</title>
+  <title>Mediaplayer Categorie View</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
       background: linear-gradient(160deg, #1e293b, #0f172a);
-    }
-    iframe {
-      background: black;
     }
   </style>
 </head>
 <body class="text-white font-sans">
 
   <!-- Header -->
-  <header class="flex justify-between items-center p-4 bg-gray-900/70 sticky top-0 z-40">
-    <h1 class="text-xl font-bold">📺 Mijn Media Player</h1>
+  <header class="flex justify-between items-center p-4 bg-gray-900/70 backdrop-blur-md shadow-md sticky top-0 z-40">
+ 
+    <button id="menuBtn" class="text-white focus:outline-none">
+      <!-- Menu Icon -->
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2"
+           viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
   </header>
 
-  <!-- Player -->
+  <!-- Sidebar met Categorieën -->
+  <aside id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-gray-900/95 backdrop-blur-lg shadow-lg transform -translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
+    <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+      <h2 class="text-lg font-semibold">Categorieën</h2>
+      <button id="closeMenu" class="text-gray-400 hover:text-white">✕</button>
+    </div>
+    <div class="p-4 space-y-4">
+      <button class="catBtn w-full text-left p-2 bg-gray-800 rounded hover:bg-gray-700" data-target="sport">🏆 Sport</button>
+      <button class="catBtn w-full text-left p-2 bg-gray-800 rounded hover:bg-gray-700" data-target="nieuws">📰 Nieuws</button>
+      <button class="catBtn w-full text-left p-2 bg-gray-800 rounded hover:bg-gray-700" data-target="films">🎬 Films</button>
+      <button class="catBtn w-full text-left p-2 bg-gray-800 rounded hover:bg-gray-700" data-target="muziek">🎵 Muziek</button>
+    </div>
+  </aside>
+  <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
+
+  <!-- Main Content -->
   <main class="p-4 space-y-10">
+
+    <!-- Media Player -->
     <div id="playerContainer" class="w-full max-w-3xl mx-auto">
-      <iframe id="playerFrame"
-              src=""
-              class="w-full h-64 sm:h-96 rounded-2xl shadow-2xl border border-gray-700"
-              frameborder="0" allow="autoplay; fullscreen"></iframe>
+      <iframe id="playerFrame" src="http://online.hdgo.site/player30/playerjs.html?file=stream1"
+              class="w-full h-64 sm:h-96 rounded-2xl shadow-2xl border border-gray-700" frameborder="0" allowfullscreen></iframe>
     </div>
 
-    <!-- Kanaal lijst -->
+    <!-- Hier tonen we dynamisch de gekozen categorie -->
     <section id="categoryContainer" class="space-y-6 max-w-3xl mx-auto">
-      <h2 class="text-xl font-semibold mb-3">🏆 Sport</h2>
-      <div class="flex flex-col space-y-3">
-        <button class="channelCard bg-gray-800/70 rounded-xl p-4 text-left hover:bg-gray-700 transition" 
-                data-url="http://online.hdgo.site/player30/playerjs.html?file=sport1">Sport Kanaal 1</button>
-        <button class="channelCard bg-gray-800/70 rounded-xl p-4 text-left hover:bg-gray-700 transition" 
-                data-url="http://online.hdgo.site/player30/playerjs.html?file=sport2">Sport Kanaal 2</button>
-      </div>
+      <p class="text-gray-400 italic">Kies een categorie uit het menu om kanalen te zien.</p>
     </section>
+
   </main>
 
   <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    const closeMenu = document.getElementById("closeMenu");
     const playerFrame = document.getElementById("playerFrame");
     const playerContainer = document.getElementById("playerContainer");
+    const categoryContainer = document.getElementById("categoryContainer");
 
-    // Kanaal wisselen
+    // Data voor kanalen per categorie
+    const categories = {
+      sport: {
+        title: "🏆 Sport",
+        channels: [
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=sport1" },
+          { name: "Sport Kanaal 2", url: "http://online.hdgo.site/player30/playerjs.html?file=sport2" }
+        ]
+      },
+      nieuws: {
+        title: "📰 Nieuws",
+        channels: [
+          { name: "Nieuws Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=nieuws1" },
+          { name: "Nieuws Kanaal 2", url: "http://online.hdgo.site/player30/playerjs.html?file=nieuws2" }
+        ]
+      },
+      films: {
+        title: "🎬 Films",
+        channels: [
+          { name: "Film Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=film1" },
+          { name: "Film Kanaal 2", url: "http://online.hdgo.site/player30/playerjs.html?file=film2" }
+        ]
+      },
+      muziek: {
+        title: "🎵 Muziek",
+        channels: [
+                { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Muziek Kanaal 2", url: "http://online.hdgo.site/player30/playerjs.html?file=https://listen.powerapp.com.tr/pturkslow/slow.smil/playlist.m3u8" }
+        ]
+      }
+    };
+
+    // Sidebar openen/sluiten
+    menuBtn.addEventListener("click", () => {
+      sidebar.classList.remove("-translate-x-full");
+      overlay.classList.remove("hidden");
+    });
+    function closeSidebar() {
+      sidebar.classList.add("-translate-x-full");
+      overlay.classList.add("hidden");
+    }
+    if (closeMenu) closeMenu.addEventListener("click", closeSidebar);
+    overlay.addEventListener("click", closeSidebar);
+
+    // Kanaal laden
     function changeChannel(url) {
-      // Zet autoplay erbij
-      playerFrame.src = url + "&autoplay=1";
-
-      // Scroll naar de player
+      playerFrame.src = url;
+      closeSidebar();
       setTimeout(() => {
         playerContainer.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 200);
-
-      // Op mobiel proberen fullscreen te forceren
-      if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
-        openFullscreen(playerFrame);
-      }
     }
 
-    // Fullscreen openen (indien ondersteund)
-    function openFullscreen(element) {
-      let req = element.requestFullscreen || element.webkitRequestFullscreen || element.msRequestFullscreen;
-      if (req) {
-        req.call(element).catch(() => {
-          console.log("Fullscreen niet mogelijk, fallback naar embedded view.");
-        });
-      }
+    // Toon categorie op voorpagina
+    function showCategory(catKey) {
+      const cat = categories[catKey];
+      if (!cat) return;
+
+      categoryContainer.innerHTML = `
+        <h2 class="text-xl font-semibold mb-3">${cat.title}</h2>
+        <div class="flex flex-col space-y-3">
+          ${cat.channels.map(ch => `
+            <button class="channelCard bg-gray-800/70 rounded-xl p-4 text-left hover:bg-gray-700 transition" data-url="${ch.url}">
+              ${ch.name}
+            </button>`).join("")}
+        </div>
+      `;
+
+      // Nieuwe knoppen activeren
+      document.querySelectorAll(".channelCard").forEach(card => {
+        card.addEventListener("click", () => changeChannel(card.dataset.url));
+      });
     }
 
-    // Event voor kanaal klikken
-    document.querySelectorAll(".channelCard").forEach(card => {
-      card.addEventListener("click", () => changeChannel(card.dataset.url));
+    // Klik categorie in menu
+    document.querySelectorAll(".catBtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        showCategory(btn.dataset.target);
+        closeSidebar();
+        setTimeout(() => {
+          categoryContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 200);
+      });
     });
   </script>
 </body>
