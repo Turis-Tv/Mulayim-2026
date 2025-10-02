@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
   <meta name="theme-color" content="#071028" />
-  <title>AllesPlayer — Mobiel vriendelijk</title>
+
   <link rel="preconnect" href="https://www.youtube.com">
   <style>
     :root{
@@ -25,7 +25,7 @@
     .logo{display:flex;align-items:center;gap:10px}
     .logo .mark{width:44px;height:44;border-radius:10px;background:linear-gradient(90deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700}
     .searchbar{flex:1}
-    .searchbar input{width:100%;padding:10px 12px;border-radius:12px;border:0;background:rgba(255,255,255,0.03);color:var(--text);font-size:14px}
+    .searchbar input{width:100%;padding:12px 14px;border-radius:12px;border:0;background:rgba(255,255,255,0.03);color:var(--text);font-size:15px}
 
     /* Player */
     .player-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));backdrop-filter:blur(6px);border-radius:14px;padding:8px;box-shadow:0 10px 30px rgba(2,6,23,0.6);display:flex;flex-direction:column;gap:8px}
@@ -34,8 +34,8 @@
 
     /* Player controls (big touch targets) */
     .controls{display:flex;align-items:center;gap:8px}
-    .btn{padding:10px 12px;border-radius:12px;border:0;background:rgba(255,255,255,0.03);min-width:44px;min-height:44px;font-size:16px;display:flex;align-items:center;justify-content:center}
-    .bigbtn{padding:12px 16px;border-radius:14px;font-weight:600}
+    .btn{padding:12px;border-radius:12px;border:0;background:rgba(255,255,255,0.03);min-width:48px;min-height:48px;font-size:16px;display:flex;align-items:center;justify-content:center}
+    .bigbtn{padding:12px 18px;border-radius:14px;font-weight:600}
     .title-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
     .title{font-size:16px;font-weight:600}
     .meta{font-size:12px;color:var(--muted)}
@@ -65,19 +65,25 @@
     .playlist::-webkit-scrollbar-thumb,.channels::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.04);border-radius:10px}
 
     footer.note{font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
+
+    /* utility */
+    .muted{color:var(--muted)}
+    .controls-row{display:flex;gap:8px;align-items:center}
+    .right-controls{display:flex;gap:6px;align-items:center}
+
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="topbar">
-      <div class="logo"><div class="mark">AP</div><div style="line-height:1"><div style="font-weight:700">AllesPlayer</div><div style="font-size:12px;color:var(--muted)">Mobiel vriendelijk</div></div></div>
+      <div class="logo"><div class="mark"> </div><div style="line-height:1"><div style="font-weight:700"> </div><div style="font-size:12px;color:var(--muted)"> </div></div></div>
       <div class="searchbar"><input id="search" placeholder="Zoek..." aria-label="Zoek kanalen en titels" /></div>
       <button id="openSheet" class="btn" aria-label="Open kanalen">☰</button>
     </div>
 
     <div class="layout-desktop" style="flex:1;gap:12px">
       <aside class="sidebar player-card" style="display:none" id="sidebarDesktop">
-        <div style="font-weight:700;margin-bottom:8px">Kanalen</div>
+        <div style="font-weight:700;margin-bottom:8px"> </div>
         <div class="channels" id="channelsDesktop"></div>
         <div style="margin-top:auto"><input id="newUrlDesk" placeholder="m3u8 of YouTube link" style="width:100%;padding:8px;border-radius:10px;border:0;background:rgba(255,255,255,0.03);color:var(--text);margin-top:8px"/><button id="addDesk" class="btn" style="width:100%;margin-top:8px">Toevoegen</button></div>
       </aside>
@@ -86,14 +92,18 @@
         <section class="player-card">
           <div class="title-row">
             <div>
-              <div class="title" id="currentTitle">Kies een kanaal</div>
+              <div class="title" id="currentTitle">Bir kanal seçin</div>
               <div class="meta" id="currentMeta">—</div>
             </div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <button id="prev" class="btn" aria-label="Vorige">⟨</button>
-              <button id="playPause" class="bigbtn btn">Play</button>
-              <button id="next" class="btn" aria-label="Volgende">⟩</button>
-              <button id="fullscreen" class="btn" aria-label="Volledig scherm">⤢</button>
+            <div class="right-controls">
+              <button id="toggleLink" class="btn" title="Toon/Verberg link">🔒</button>
+              <button id="toggleHtml" class="btn" title="HTML-weergave">&lt;/&gt;</button>
+              <div style="display:flex;gap:8px;align-items:center">
+                <button id="prev" class="btn" aria-label="Vorige">⟨</button>
+                <button id="playPause" class="bigbtn btn">Play</button>
+                <button id="next" class="btn" aria-label="Volgende">⟩</button>
+                <button id="fullscreen" class="btn" aria-label="Volledig scherm">⤢</button>
+              </div>
             </div>
           </div>
 
@@ -115,31 +125,48 @@
         </section>
 
         <section class="player-card" style="padding:8px">
-          <div style="font-weight:700;margin-bottom:6px">Beschrijving</div>
-          <div id="desc" style="color:var(--muted);font-size:14px">Gebruik de kanaalknop ☰ of voeg eigen m3u8/YouTube links toe. Touch-vriendelijk. Draai je telefoon voor grotere weergave.</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div style="font-weight:700"> </div>
+            <div style="font-size:12px;color:var(--muted)"> </div>
+          </div>
+          <div id="desc" style="color:var(--muted);font-size:14px"> </div>
         </section>
       </main>
     </div>
 
-    <div id="sheet" class="bottomsheet" style="display:none" aria-hidden="true">
+    <div id="sheet" class="bottomsheet" style="display:block" aria-hidden="false">
       <div class="sheet-handle"></div>
       <div style="display:flex;gap:8px;padding:8px"><input id="newUrl" placeholder="m3u8 of YouTube link" style="flex:1;padding:10px;border-radius:10px;border:0;background:rgba(255,255,255,0.03);color:var(--text)"/><button id="addBtn" class="btn">+</button></div>
       <div class="channels" id="channels"></div>
     </div>
 
-    <footer class="note">Swipe in de playlist om te scrollen • Space togglet play/pauze (desktop)</footer>
+    <footer class="note"> </footer>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"></script>
   <script>
     // --- data ---
-    const playlist = [
-      {id:1,type:'hls',url:'https://live.duhnet.tv/S2/HLS_LIVE/eurodnp/track_3_750/playlist.m3u8',title:'Test HLS - Mux',logo:'https://picsum.photos/200/120?random=11'},
-      {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=6N8_r2uwLEc',title:'YouTube Demo',logo:'https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg'},
-      {id:3,type:'youtube',url:'https://www.youtube.com/watch?v=byUuAxjfP2M',title:'YouTube Demo',logo:'https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg'},
-      {id:3,type:'youtube',url:'https://www.youtube.com/watch?v=byUuAxjfP2M',title:'YouTube Demo',logo:'https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg'},
-      {id:3,type:'youtube',url:'https://www.youtube.com/watch?v=byUuAxjfP2M',title:'YouTube Demo',logo:'https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg'},
-      {id:4,type:'hls',url:'http://12204.vod.adultiptv.net/ph58657d939d860/play.m3u8',title:'Sintel HLS',logo:'https://picsum.photos/200/120?random=3'}
+    const playlist = [    
+      {id:1,type:'hls',url:'https://live.duhnet.tv/S2/HLS_LIVE/eurodnp/track_3_750/playlist.m3u8',title:'Test HLS - Mux',logo:'https://picsum.photos/200/120?random=11', description:'Test stream from Mux.'},
+      {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=6N8_r2uwLEc',title:'YouTube Demo',logo:'https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg', description:'YouTube demo video.'},
+      {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=JjTeViaVdoI',title:'Evlerinin Önü ',logo:'https://img.youtube.com/vi/JjTeViaVdoI/maxresdefault.jpg', description:'Evlerinin Önü'},
+      {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=c1h68yMxb3I',title:'Makaram Sarı Bağlar',logo:'https://img.youtube.com/vi/c1h68yMxb3I/maxresdefault.jpg', description:'Makaram Sarı Bağlar'},
+      {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=Mwu43X40PgE',title:'Lorke Lorke',logo:'https://img.youtube.com/vi/Mwu43X40PgE/maxresdefault.jpg', description:'Lorke Lorke'},
+      {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=qaxtyajdjmc',title:'Kar Yağar',logo:'https://img.youtube.com/vi/qaxtyajdjmc/maxresdefault.jpg', description:'Kar Yağar'},
+      {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=bjFjXCkEIzQ',title:'Evlerinin Önü',logo:'https://img.youtube.com/vi/bjFjXCkEIzQ/maxresdefault.jpg', description:'Evlerinin Önü'},
+      {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=JW5W2kVLxAA',title:'İğne Attım',logo:'https://img.youtube.com/vi/JW5W2kVLxAA/maxresdefault.jpg', description:'İğne Attım'},
+      {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=JRg5_qcx6es',title:'Hazalım',logo:'https://img.youtube.com/vi/JRg5_qcx6es/maxresdefault.jpg', description:'Hazalım'},
+      {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=1O00V1XmxXw',title:'Ne Güzel Yaratmış',logo:'https://img.youtube.com/vi/1O00V1XmxXw/maxresdefault.jpg', description:'Ne Güzel Yaratmış'},
+      {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=1uhBfgCGtdo',title:'Delalım',logo:'https://img.youtube.com/vi/1uhBfgCGtdo/maxresdefault.jpg', description:'Delalım'},
+      {id:2,type:'youtube',url:'https://www.yout-ube.com/watch?v=byUuAxjfP2M',title:'Emminem',logo:'https://img.youtube.com/vi/byUuAxjfP2M/maxresdefault.jpg', description:'Emminem'},
+      {id:2,type:'youtube',url:'https://www.yout-ube.com/watch?v=L3AJYq1BwUA',title:'Gözündeki Yaşlarına',logo:'https://img.youtube.com/vi/L3AJYq1BwUA/maxresdefault.jpg', description:'Gözündeki Yaşlarına'},
+      {id:2,type:'youtube',url:'https://www.yout-ube.com/watch?v=Ae2uE9_m73I',title:'Başındaki Poşu mudur',logo:'https://img.youtube.com/vi/Ae2uE9_m73I/maxresdefault.jpg', description:'Başındaki Poşu mudur'},
+      {id:2,type:'youtube',url:'https://www.yout-ube.com/watch?v=bbYjyvwAfhU',title:'Duydunuz mu',logo:'https://img.youtube.com/vi/bbYjyvwAfhU/maxresdefault.jpg', description:'Duydunuz mu'},
+      {id:2,type:'youtube',url:'https://www.yout-ube.com/watch?v=Bv3GSlGqI4c',title:'Zor imiş Meğer',logo:'https://img.youtube.com/vi/Bv3GSlGqI4c/maxresdefault.jpg', description:'Zor imiş Meğer'},
+      {id:2,type:'youtube',url:'https://www.yout-ube.com/watch?v=vOF0rpRK3ow',title:'Alsın Beni Benden',logo:'https://img.youtube.com/vi/vOF0rpRK3ow/maxresdefault.jpg', description:'Alsın Beni Benden'},
+      {id:2,type:'youtube',url:'https://www.yout-ube.com/watch?v=MqV55hD0Sv4',title:'O Yar Gelir',logo:'https://img.youtube.com/vi/MqV55hD0Sv4/maxresdefault.jpg', description:'O Yar Gelir'},
+      {id:2,type:'youtube',url:'https://www.yout-ube.com/watch?v=YByNhFSYWw4',title:'Sigaramın Dumanı',logo:'https://img.youtube.com/vi/YByNhFSYWw4/maxresdefault.jpg', description:'Sigaramın Dumanı'},
+      {id:4,type:'hls',url:'http://12204.vod.adultiptv.net/ph58657d939d860/play.m3u8',title:'Sintel HLS',logo:'https://picsum.photos/200/120?random=3', description:'Sintel sample HLS.'}
     ];
 
     // --- refs ---
@@ -152,12 +179,33 @@
     const currentMeta = document.getElementById('currentMeta');
     const desc = document.getElementById('desc');
     const sheet = document.getElementById('sheet');
+    const toggleLinkBtn = document.getElementById('toggleLink');
+    const toggleHtmlBtn = document.getElementById('toggleHtml');
 
-    let currentIndex = -1; let hls; let ytPlayer;
+    let currentIndex = -1; let hls; let ytPlayer; let linksHidden = true; let htmlMode = false;
+
+    function escapeHTML(str){ return String(str).replace(/[&<>"']/g, function(s){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s];}); }
+
+    // simple sanitizer that allows a few tags (a, b, i, br, p)
+    function sanitizeHtml(unsafe){ const parser = new DOMParser(); const doc = parser.parseFromString(unsafe,'text/html'); const allowed = ['A','B','I','BR','P'];
+      function clean(node){ const children = Array.from(node.childNodes); children.forEach(c=>{ if(c.nodeType===1){ if(!allowed.includes(c.nodeName)){
+            // unwrap: replace node with its children
+            while(c.firstChild) node.insertBefore(c.firstChild,c);
+            node.removeChild(c);
+          } else {
+            // keep but sanitize attributes on links
+            if(c.nodeName==='A'){ const href=c.getAttribute('href')||''; c.setAttribute('href',href); c.setAttribute('target','_blank'); }
+            clean(c);
+          }
+        } else if(c.nodeType===3){ /* text node ok */ }
+      }) }
+      clean(doc.body);
+      return doc.body.innerHTML;
+    }
 
     function makeChannelEl(ch, idx){
       const el = document.createElement('div'); el.className='channel'; el.dataset.index=idx;
-      el.innerHTML = `<img src="${ch.logo||'https://picsum.photos/200/120'}" alt="logo"><div style="display:flex;flex-direction:column"><div style="font-weight:600">${ch.title}</div><div style="font-size:12px;color:var(--muted)">${ch.type.toUpperCase()}</div></div>`;
+      el.innerHTML = `<img src="${ch.logo||'https://picsum.photos/200/120'}" alt="logo"><div style="display:flex;flex-direction:column"><div style="font-weight:600">${escapeHTML(ch.title)}</div><div style="font-size:12px;color:var(--muted)">${escapeHTML(ch.type.toUpperCase())}</div></div>`;
       el.addEventListener('click',()=>{ playIndex(idx); if(window.innerWidth<900) toggleSheet(false); });
       return el;
     }
@@ -167,10 +215,13 @@
       playlist.forEach((ch,idx)=>{ if(filter && !ch.title.toLowerCase().includes(filter) && !ch.type.includes(filter)) return; channelsEl.appendChild(makeChannelEl(ch,idx)); channelsDesktopEl.appendChild(makeChannelEl(ch,idx)); });
     }
 
-    function renderPlaylist(){ playlistEl.innerHTML=''; playlist.forEach((it,idx)=>{ const item = document.createElement('div'); item.className='pl-item'; item.innerHTML=`<img src="${it.logo||'https://picsum.photos/200/120'}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:6px"><div style="font-weight:600">${it.title}</div><div style="font-size:12px;color:var(--muted)">${it.type}</div>`; item.addEventListener('click',()=>playIndex(idx)); playlistEl.appendChild(item); }); }
+    function renderPlaylist(){ playlistEl.innerHTML=''; playlist.forEach((it,idx)=>{ const item = document.createElement('div'); item.className='pl-item'; item.innerHTML=`<img src="${it.logo||'https://picsum.photos/200/120'}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:6px"><div style="font-weight:600">${escapeHTML(it.title)}</div><div style="font-size:12px;color:var(--muted)">${escapeHTML(it.type)}</div>`; item.addEventListener('click',()=>playIndex(idx)); playlistEl.appendChild(item); }); }
 
     // play index (HLS or YouTube)
-    function playIndex(i){ if(i<0||i>=playlist.length) return; const item = playlist[i]; currentIndex=i; currentTitle.textContent=item.title; currentMeta.textContent=item.url; desc.textContent='Type: '+item.type+' • URL: '+item.url;
+    function playIndex(i){ if(i<0||i>=playlist.length) return; const item = playlist[i]; currentIndex=i; currentTitle.textContent=item.title; currentMeta.textContent = item.type.toUpperCase();
+      // show description (without URL by default)
+      if(item.description){ setDescription(item.description); } else { setDescription(''); }
+
       if(item.type==='youtube'){
         video.style.display='none'; ytContainer.style.display='block'; const videoId = parseYouTubeID(item.url);
         if(!ytPlayer){ if(typeof YT==='undefined'){ const tag=document.createElement('script');tag.src='https://www.youtube.com/iframe_api';document.body.appendChild(tag); window.onYouTubeIframeAPIReady = ()=>{ ytPlayer = new YT.Player('yt-player',{videoId,playerVars:{autoplay:1,controls:1}}); } } else { ytPlayer = new YT.Player('yt-player',{videoId,playerVars:{autoplay:1,controls:1}}); } } else { ytPlayer.loadVideoById(videoId); }
@@ -181,6 +232,17 @@
         } else if(video.canPlayType('application/vnd.apple.mpegurl')){ video.src=item.url; video.addEventListener('loadedmetadata',()=>video.play()); } else { alert('HLS niet ondersteund'); }
       }
       highlightActive();
+
+      // store last item's url hidden - used when user clicks 'toon link'
+      desc.dataset.url = item.url || '';
+      desc.dataset.html = item.html || '';
+    }
+
+    function setDescription(text){ if(htmlMode){ desc.innerHTML = sanitizeHtml(text); } else { desc.textContent = text; }
+      if(linksHidden){ // remove any plain urls from showing
+        // simple url regex to hide
+        desc.innerHTML = desc.innerHTML.replace(/https?:\/\/[\w\-\.\/%\?=&#]+/g,'[link verborgen]');
+      }
     }
 
     function updateQualityOptions(){ const q=document.getElementById('quality'); q.innerHTML=''; if(!hls||!hls.levels){ q.innerHTML='<option>Auto</option>'; return;} const auto=document.createElement('option'); auto.textContent='Auto'; q.appendChild(auto); hls.levels.forEach((lvl,idx)=>{ const o=document.createElement('option'); o.value=idx; o.textContent=(lvl.height?lvl.height+'p ':'')+(lvl.bitrate?Math.round(lvl.bitrate/1000)+'kbps':''); q.appendChild(o); }); q.onchange=()=>{ const v=q.value; if(v==='Auto') hls.currentLevel=-1; else hls.currentLevel=parseInt(v); } }
@@ -193,7 +255,6 @@
     document.getElementById('playPause').addEventListener('click',()=>{ if(ytContainer.style.display!=='none' && ytPlayer){ const state = ytPlayer.getPlayerState(); if(state===1) ytPlayer.pauseVideo(); else ytPlayer.playVideo(); } else { if(video.paused) video.play(); else video.pause(); } });
     document.getElementById('prev').addEventListener('click',()=>playIndex((currentIndex-1+playlist.length)%playlist.length));
     document.getElementById('next').addEventListener('click',()=>playIndex((currentIndex+1)%playlist.length));
-    document.getElementById('quality').addEventListener('change',()=>{});
 
     // fullscreen button
     document.getElementById('fullscreen').addEventListener('click',()=>{ const el = document.getElementById('videoWrap'); if(!document.fullscreenElement) el.requestFullscreen?.(); else document.exitFullscreen?.(); });
@@ -202,14 +263,24 @@
     document.getElementById('pip').addEventListener('click',async ()=>{ try{ if(document.pictureInPictureElement) await document.exitPictureInPicture(); else await video.requestPictureInPicture(); }catch(e){alert('PiP niet beschikbaar');} });
 
     // add url
-    document.getElementById('addBtn').addEventListener('click',()=>{ const val=document.getElementById('newUrl').value.trim(); if(!val) return; const type = val.includes('youtube')||val.includes('youtu.be') ? 'youtube' : (val.endsWith('.m3u8')||val.includes('m3u8') ? 'hls' : 'hls'); playlist.push({id:Date.now(),type,url:val,title:val,logo:'https://picsum.photos/200/120?random='+Math.floor(Math.random()*999)}); renderChannels(document.getElementById('search').value.toLowerCase()); renderPlaylist(); document.getElementById('newUrl').value=''; });
-    document.getElementById('addDesk').addEventListener('click',()=>{ const val=document.getElementById('newUrlDesk').value.trim(); if(!val) return; playlist.push({id:Date.now(),type:val.includes('youtube')?'youtube':'hls',url:val,title:val,logo:'https://picsum.photos/200/120?random='+Math.floor(Math.random()*999)}); renderChannels(document.getElementById('search').value.toLowerCase()); renderPlaylist(); document.getElementById('newUrlDesk').value=''; });
+    document.getElementById('addBtn').addEventListener('click',()=>{ const val=document.getElementById('newUrl').value.trim(); if(!val) return; const type = val.includes('youtube')||val.includes('youtu.be') ? 'youtube' : (val.endsWith('.m3u8')||val.includes('m3u8') ? 'hls' : 'hls'); playlist.push({id:Date.now(),type,url:val,title:val,logo:'https://picsum.photos/200/120?random='+Math.floor(Math.random()*999),description:''}); renderChannels(document.getElementById('search').value.toLowerCase()); renderPlaylist(); document.getElementById('newUrl').value=''; });
+    document.getElementById('addDesk').addEventListener('click',()=>{ const val=document.getElementById('newUrlDesk').value.trim(); if(!val) return; playlist.push({id:Date.now(),type:val.includes('youtube')?'youtube':'hls',url:val,title:val,logo:'https://picsum.photos/200/120?random='+Math.floor(Math.random()*999),description:''}); renderChannels(document.getElementById('search').value.toLowerCase()); renderPlaylist(); document.getElementById('newUrlDesk').value=''; });
 
     document.getElementById('search').addEventListener('input',(e)=>renderChannels(e.target.value.toLowerCase()));
 
     // sheet toggle
     document.getElementById('openSheet').addEventListener('click',()=>toggleSheet());
     function toggleSheet(show){ if(show===undefined) show = (sheet.style.display==='none'); sheet.style.display = show ? 'block' : 'none'; sheet.setAttribute('aria-hidden', !show); }
+
+    // toggle link visibility
+    toggleLinkBtn.addEventListener('click', ()=>{ linksHidden = !linksHidden; toggleLinkBtn.textContent = linksHidden ? '🔒' : '🔓'; if(currentIndex>=0){ const item = playlist[currentIndex]; setDescription(htmlMode? (item.description||'') : (item.description||'')); // re-render
+        // if user wants to see the url directly, show a small temporary reveal
+        if(!linksHidden){ const url = desc.dataset.url || ''; if(url) desc.innerHTML = (htmlMode? sanitizeHtml(desc.innerHTML): escapeHTML(desc.innerHTML)) + `<div style="margin-top:6px;font-size:12px"><a href="${escapeHTML(url)}" target="_blank">Open link</a></div>`; }
+      }
+    });
+
+    // toggle html mode
+    toggleHtmlBtn.addEventListener('click', ()=>{ htmlMode = !htmlMode; toggleHtmlBtn.style.opacity = htmlMode ? '1' : '0.7'; if(currentIndex>=0){ const item = playlist[currentIndex]; const text = item.description || ''; setDescription(text); } });
 
     // keyboard mobile friendly
     window.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); document.getElementById('playPause').click(); } });
