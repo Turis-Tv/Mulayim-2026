@@ -3,121 +3,237 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Mooie Video Website</title>
+  <title>Video Website met Hamburger Menu</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white min-h-screen flex flex-col">
 
-  <!-- Header -->
-  <header class="p-6 bg-gray-900/80 backdrop-blur sticky top-0 z-20 shadow-lg text-center">
+  <!-- Header met hamburger -->
+  <header class="sticky top-0 z-30 bg-gray-900/80 backdrop-blur px-4 sm:px-6 py-4 flex items-center justify-between shadow">
+    <div class="flex items-center gap-3">
+      <button id="hambtn" aria-expanded="false" aria-controls="mobileMenu"
+              class="p-2 rounded-md bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              onclick="toggleMenu()">
+        <!-- Hamburger icon -->
+        <svg id="hambIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      <div>
  
- 
+      </div>
+    </div>
+
+    <nav class="hidden sm:flex gap-6 items-center">
+      <a href="#muziek" class="text-sm hover:text-red-500">Zeynep Şimşek</a>
+      <a href="#aanbevolen" class="text-sm hover:text-red-500">Aanbevolen</a>
+      <button class="text-sm bg-red-600 px-3 py-1 rounded-md hover:bg-red-500" onclick="reloadPage()">Herlaad pagina</button>
+      <button class="text-sm bg-gray-700 px-3 py-1 rounded-md hover:bg-gray-600" onclick="closeWindow()">Afsluit pagina</button>
+    </nav>
   </header>
 
-  <!-- Main -->
-  <main class="flex-1 p-6 space-y-12 max-w-6xl mx-auto">
+  <!-- Mobiel menu (boven of onder de header) -->
+  <div id="mobileMenu" class="fixed inset-y-0 left-0 w-64 bg-gray-900/95 backdrop-blur transform -translate-x-full transition-transform z-40 sm:hidden" aria-hidden="true">
+    <div class="p-4">
+      <div class="flex items-center justify-between mb-4">
+       
+       
+     
+        </div>
+        <button class="p-2 rounded-md bg-gray-800 hover:bg-gray-700" onclick="toggleMenu()" aria-label="Sluit menu">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
 
-    <!-- Sectie Muziek Hits -->
-    <section>
-    
+      <ul class="space-y-3">
+        <li><a href="#top" onclick="toggleMenu()" class="block px-3 py-2 rounded hover:bg-gray-800">🏠 Ev</a></li>
+        <li><a href="#muziek" onclick="toggleMenu()" class="block px-3 py-2 rounded hover:bg-gray-800">🎶 Müzik Hit'leri</a></li>
+        <li><a href="#aanbevolen" onclick="toggleMenu()" class="block px-3 py-2 rounded hover:bg-gray-800">🔥 Tavsiye Edilen</a></li>
+        <li>
+          <button onclick="reloadPage(); toggleMenu();" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">🔄 Sayfayı Yenile</button>
+        </li>
+        <li>
+          <button onclick="closeWindow()" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">⛔ Sayfayı Kapat</button>
+        </li>
+      </ul>
+
+      <div class="mt-6 text-xs text-gray-500">
+ 
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay achtergrond (wanneer menu open) -->
+  <div id="menuOverlay" class="fixed inset-0 bg-black/40 hidden z-30 sm:hidden" onclick="toggleMenu()" aria-hidden="true"></div>
+
+  <!-- Main content -->
+  <main id="top" class="flex-1 p-4 sm:p-6 space-y-10 max-w-6xl mx-auto">
+    <!-- Sectie Muziek -->
+    <section id="muziek">
+      <h2 class="text-2xl font-bold mb-4">🎶 Muziek Hits</h2>
       <div class="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-
-        <!-- Kaartje -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition text-center">
-          <img src="https://img.youtube.com/vi/JjTeViaVdoI/maxresdefault.jpg"
-               alt="Zeynep Şimşek "
-               class="w-full h-40 object-cover cursor-pointer"
-               onclick="openPlayer('JjTeViaVdoI')">
-          <div class="p-3">
-            <p class="text-sm font-medium">Evlerinin Önü Yoldur Yolaktır</p>
-          </div>
+        <!-- Kaartje 1 -->
+        <div class="bg-gray-800 rounded-xl overflow-hidden shadow hover:shadow-2xl transition">
+          <button class="w-full text-left" onclick="openPlayer('JjTeViaVdoI')">
+            <img src="https://img.youtube.com/vi/JjTeViaVdoI/maxresdefault.jpg" alt="Zeynep Şimşek"
+                 class="w-full h-40 object-cover">
+            <div class="p-3">
+              <p class="text-sm font-medium">Evlerinin Önü Yoldur Yolaktır</p>
+            </div>
+          </button>
         </div>
 
-        <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition text-center">
-          <img src="https://img.youtube.com/vi/byUuAxjfP2M/maxresdefault.jpg"
-               alt="Zeynep Şimşek"
-               class="w-full h-40 object-cover cursor-pointer"
-               onclick="openPlayer('byUuAxjfP2M')">
-          <div class="p-3">
-            <p class="text-sm font-medium">Emminem</p>
-          </div>
+        <!-- Kaartje 2 -->
+        <div class="bg-gray-800 rounded-xl overflow-hidden shadow hover:shadow-2xl transition">
+          <button class="w-full text-left" onclick="openPlayer('byUuAxjfP2M')">
+            <img src="https://img.youtube.com/vi/byUuAxjfP2M/maxresdefault.jpg" alt="Emminem"
+                 class="w-full h-40 object-cover">
+            <div class="p-3">
+              <p class="text-sm font-medium">Emminem</p>
+            </div>
+          </button>
         </div>
 
-        <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition text-center">
-          <img src="https://img.youtube.com/vi/qaxtyajdjmc/maxresdefault.jpg"
-               alt="Zeynep Şimşek"
-               class="w-full h-40 object-cover cursor-pointer"
-               onclick="openPlayer('qaxtyajdjmc')">
-          <div class="p-3">
-            <p class="text-sm font-medium">Kar Yağar Kar Üstüne</p>
-          </div>
+        <!-- Kaartje 3 -->
+        <div class="bg-gray-800 rounded-xl overflow-hidden shadow hover:shadow-2xl transition">
+          <button class="w-full text-left" onclick="openPlayer('qaxtyajdjmc')">
+            <img src="https://img.youtube.com/vi/qaxtyajdjmc/maxresdefault.jpg" alt="Zeynep Şimşek"
+                 class="w-full h-40 object-cover">
+            <div class="p-3">
+              <p class="text-sm font-medium">Kar Yağar Kar Üstüne</p>
+            </div>
+          </button>
         </div>
-
       </div>
     </section>
 
     <!-- Sectie Aanbevolen -->
-    <section>
-      <h2 class="text-2xl font-bold mb-6 border-b border-gray-700 pb-2">🔥 Aanbevolen Video’s</h2>
+    <section id="aanbevolen">
+      <h2 class="text-2xl font-bold mb-4">🔥 Aanbevolen</h2>
       <div class="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-
-        <!-- Extra kaartje voorbeeld -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition text-center">
-          <img src="https://img.youtube.com/vi/c1h68yMxb3I/maxresdefault.jpg"
-               alt="Zeynep Şimşek"
-               class="w-full h-40 object-cover cursor-pointer"
-               onclick="openPlayer('c1h68yMxb3I')">
-          <div class="p-3">
-            <p class="text-sm font-medium">Makaram Sarı Bağlar</p>
-          </div>
+        <div class="bg-gray-800 rounded-xl overflow-hidden shadow hover:shadow-2xl transition">
+          <button class="w-full text-left" onclick="openPlayer('c1h68yMxb3I')">
+            <img src="https://img.youtube.com/vi/c1h68yMxb3I/maxresdefault.jpg" alt="Zeynep Şimşek"
+                 class="w-full h-40 object-cover">
+            <div class="p-3">
+              <p class="text-sm font-medium">Makaram Sarı Bağlar</p>
+            </div>
+          </button>
         </div>
 
-        <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition text-center">
-          <img src="https://img.youtube.com/vi/gb__1TCkixo/maxresdefault.jpg"
-               alt="Zeynep Şimşek"
-               class="w-full h-40 object-cover cursor-pointer"
-               onclick="openPlayer('gb__1TCkixo')">
-          <div class="p-3">
-            <p class="text-sm font-medium">Vay Nene</p>
-          </div>
+        <div class="bg-gray-800 rounded-xl overflow-hidden shadow hover:shadow-2xl transition">
+          <button class="w-full text-left" onclick="openPlayer('gb__1TCkixo')">
+            <img src="https://img.youtube.com/vi/gb__1TCkixo/maxresdefault.jpg" alt="Zeynep Şimşek"
+                 class="w-full h-40 object-cover">
+            <div class="p-3">
+              <p class="text-sm font-medium">Vay Nene</p>
+            </div>
+          </button>
         </div>
-
       </div>
     </section>
   </main>
 
   <!-- Overlay Player -->
-  <div id="overlay" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-30 p-4">
-    <div class="relative w-full max-w-4xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
+  <div id="overlay" class="fixed inset-0 bg-black/95 hidden items-center justify-center z-50 p-4">
+    <div class="relative w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden shadow-2xl">
       <iframe id="videoFrame" class="absolute inset-0 w-full h-full" frameborder="0"
         allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
         allowfullscreen></iframe>
     </div>
-    <button onclick="closePlayer()" 
-            class="absolute top-6 right-6 bg-red-600 px-5 py-2 rounded-lg font-semibold shadow-lg">
-      ✕ Sluiten
-    </button>
+    <button onclick="closePlayer()" class="absolute top-6 right-6 bg-red-600 px-4 py-2 rounded-md font-semibold shadow-lg">✕ Kapat</button>
   </div>
 
   <!-- Footer -->
-  <footer class="p-6 text-center text-gray-500 text-sm">
-    © 2026  Video Website · Gemaakt door Turis Tv ❤️ en CSS
+  <footer class="p-4 text-center text-gray-500 text-sm">
+    © 2025 Turis Tv Teşekkürler
+
   </footer>
 
   <script>
+    /* Hamburger menu toggle (mobile) */
+    function toggleMenu() {
+      const menu = document.getElementById('mobileMenu');
+      const overlay = document.getElementById('menuOverlay');
+      const btn = document.getElementById('hambtn');
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      if (expanded) {
+        // close
+        menu.style.transform = 'translateX(-100%)';
+        menu.setAttribute('aria-hidden', 'true');
+        overlay.classList.add('hidden');
+        btn.setAttribute('aria-expanded', 'false');
+      } else {
+        // open
+        menu.style.transform = 'translateX(0)';
+        menu.setAttribute('aria-hidden', 'false');
+        overlay.classList.remove('hidden');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    /* Player overlay functions */
     function embedSrc(id) {
-      return "https://www.yout-ube-nocookie.com/embed/" + encodeURIComponent(id) + "?rel=0&modestbranding=1&autoplay=1";
+      return "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id) + "?rel=0&modestbranding=1&autoplay=1";
     }
     function openPlayer(id) {
-      document.getElementById("videoFrame").src = embedSrc(id);
-      document.getElementById("overlay").classList.remove("hidden");
-      document.getElementById("overlay").classList.add("flex");
+      document.getElementById('videoFrame').src = embedSrc(id);
+      const overlay = document.getElementById('overlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      // lock scrolling
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
     }
     function closePlayer() {
-      document.getElementById("videoFrame").src = "";
-      document.getElementById("overlay").classList.remove("flex");
-      document.getElementById("overlay").classList.add("hidden");
+      document.getElementById('videoFrame').src = '';
+      const overlay = document.getElementById('overlay');
+      overlay.classList.remove('flex');
+      overlay.classList.add('hidden');
+      // restore scrolling
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
     }
+
+    /* Herlaad pagina */
+    function reloadPage() {
+      location.reload();
+    }
+
+    /* Afsluit pagina (met fallback) */
+    function closeWindow() {
+      try {
+        // probeer te sluiten
+        window.close();
+        // als window.close niet werkt (meestal), ga naar lege pagina als fallback
+        setTimeout(() => {
+          // check if still open by verifying document still visible
+          if (!document.hidden) {
+            location.href = 'about:blank';
+          }
+        }, 300);
+      } catch (e) {
+        location.href = 'about:blank';
+      }
+    }
+
+    // Sluit mobiel menu met Esc
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        // close player if open
+        const overlay = document.getElementById('overlay');
+        if (!overlay.classList.contains('hidden')) {
+          closePlayer();
+          return;
+        }
+        // close menu if open
+        const btn = document.getElementById('hambtn');
+        if (btn.getAttribute('aria-expanded') === 'true') toggleMenu();
+      }
+    });
   </script>
 </body>
 </html>
