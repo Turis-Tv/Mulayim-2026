@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <meta name="theme-color" content="#071028" />
+  <title>AllesPlayer — Mobiel vriendelijk</title>
+  <style>
+    body{margin:0;font-family:sans-serif;background:#071028;color:#eaeef6}
+    .wrap{display:flex;flex-direction:column;gap:12px;padding:12px;height:100vh;box-sizing:border-box}
+    .player-card{background:rgba(255,255,255,0.05);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:8px}
+    .video-wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000}
+    video, iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+    .btn{padding:10px 16px;border-radius:10px;border:0;background:rgba(255,255,255,0.1);color:#fff;cursor:pointer}
+    .playlist{display:flex;gap:10px;overflow-x:auto;padding:8px}
+    .pl-item{min-width:160px;background:rgba(255,255,255,0.06);padding:8px;border-radius:10px;cursor:pointer}
+    .pl-item img{width:100%;height:90px;object-fit:cover;border-radius:6px;margin-bottom:6px}
+    .title{font-weight:600;font-size:16px}
+    .meta{font-size:12px;color:#9fb0c8}
+    #desc{font-size:14px;color:#9fb0c8}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="player-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div id="currentTitle" class="title">Kies een kanaal</div>
+          <div id="currentMeta" class="meta">—</div>
+        </div>
+        <button id="playPause" class="btn">Play</button>
+      </div>
+      <div class="video-wrap" id="videoWrap">
+        <video id="video" controls playsinline webkit-playsinline></video>
+        <div id="yt-player" style="display:none"></div>
+      </div>
+    </section>
+
+    <section class="player-card">
+      <div style="font-weight:700;margin-bottom:6px">Playlist</div>
+      <div id="playlist" class="playlist"></div>
+    </section>
+
+    <section class="player-card">
+      <div style="font-weight:700;margin-bottom:6px">Beschrijving</div>
+      <div id="desc"></div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"></script>
+  <script>
+    const playlist = [
+      {id:1,type:'hls',url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',title:'Test HLS',logo:'https://picsum.photos/200/120?random=1', description:'<p>Voorbeeld <b>HTML</b> beschrijving voor <i>HLS</i> stream met <a href="https://example.com">link</a>.</p>'},
+      {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=6N8_r2uwLEc',title:'YouTube Demo',logo:'https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg', description:'<p>Dit is een <b>YouTube</b> demo video.</p>'},
+      {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=JjTeViaVdoI',title:'YouTube Demo',logo:'https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg', description:'<p>Dit is een <b>YouTube</b> demo video.</p>'},
+
+      {id:3,type:'hls',url:'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',title:'Sintel Film',logo:'https://picsum.photos/200/120?random=3', description:'<p>Korte film <i>Sintel</i> via HLS.</p>'}
+    ];
+
+    const video = document.getElementById('video');
+    const ytContainer = document.getElementById('yt-player');
+    const currentTitle = document.getElementById('currentTitle');
+    const currentMeta = document.getElementById('currentMeta');
+    const desc = document.getElementById('desc');
+    const playlistEl = document.getElementById('playlist');
+
+    let currentIndex=-1; let hls; let ytPlayer;
+
+    function sanitizeHtml(unsafe){
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(unsafe,'text/html');
+      const allowed = ['A','B','I','BR','P'];
+      function clean(node){
+        const children = Array.from(node.childNodes);
+        children.forEach(c=>{
+          if(c.nodeType===1){
+            if(!allowed.includes(c.nodeName)){
+              while(c.firstChild) node.insertBefore(c.firstChild,c);
+              node.removeChild(c);
+            } else {
+              if(c.nodeName==='A'){
+                const href=c.getAttribute('href')||'';
+                c.setAttribute('href',href);
+                c.setAttribute('target','_blank');
+              }
+              clean(c);
+            }
+          }
+        });
+      }
+      clean(doc.body);
+      return doc.body.innerHTML;
+    }
+
+    function renderPlaylist(){
+      playlistEl.innerHTML='';
+      playlist.forEach((it,idx)=>{
+        const item=document.createElement('div');
+        item.className='pl-item';
+        item.innerHTML=`<img src="${it.logo}"><div class="title">${it.title}</div><div class="meta">${it.type}</div>`;
+        item.addEventListener('click',()=>playIndex(idx));
+        playlistEl.appendChild(item);
+      });
+    }
+
+    function playIndex(i){
+      if(i<0||i>=playlist.length)return;
+      const item=playlist[i]; currentIndex=i;
+      currentTitle.textContent=item.title;
+      currentMeta.textContent=item.type.toUpperCase();
+      desc.innerHTML=sanitizeHtml(item.description);
+
+      if(item.type==='youtube'){
+        video.style.display='none'; ytContainer.style.display='block';
+        const videoId=parseYouTubeID(item.url);
+        if(!ytPlayer){
+          if(typeof YT==='undefined'){
+            const tag=document.createElement('script');tag.src='https://www.youtube.com/iframe_api';document.body.appendChild(tag);
+            window.onYouTubeIframeAPIReady=()=>{
+              ytPlayer=new YT.Player('yt-player',{videoId,playerVars:{autoplay:1,controls:1}});
+            }
+          } else {
+            ytPlayer=new YT.Player('yt-player',{videoId,playerVars:{autoplay:1,controls:1}});
+          }
+        } else { ytPlayer.loadVideoById(videoId); }
+      } else {
+        ytContainer.style.display='none'; video.style.display='block'; video.pause(); if(hls){hls.destroy();hls=null}
+        if(Hls.isSupported()){
+          hls=new Hls(); hls.loadSource(item.url); hls.attachMedia(video); hls.on(Hls.Events.MANIFEST_PARSED, ()=>{video.play();});
+        } else if(video.canPlayType('application/vnd.apple.mpegurl')){ video.src=item.url; video.play(); }
+      }
+      document.getElementById('videoWrap').requestFullscreen?.();
+    }
+
+    function parseYouTubeID(url){ const m=url.match(/(v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/); return m?m[2]:url; }
+
+    document.getElementById('playPause').addEventListener('click',()=>{ playIndex(0); });
+
+    renderPlaylist();
+  </script>
+</body>
+</html>
