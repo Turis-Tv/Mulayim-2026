@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
   <meta name="theme-color" content="#071028" />
-  <title>AllesPlayer — Mobiel vriendelijk</title>
+  <title>AllesPlayer — Mobiel vriendelijk (ad-blocked)</title>
   <style>
     body{margin:0;font-family:sans-serif;background:#071028;color:#eaeef6}
     .wrap{display:flex;flex-direction:column;gap:12px;padding:12px;height:100vh;box-sizing:border-box}
@@ -18,6 +18,20 @@
     .title{font-weight:600;font-size:16px}
     .meta{font-size:12px;color:#9fb0c8}
     #desc{font-size:14px;color:#9fb0c8}
+
+    /* ---------- AD-BLOCK CSS (verberg veelvoorkomende advertentie containers) ---------- */
+    [id*="ad"], [class*="ad"], .ads, .adslot, .ad-slot, .ad-banner, .ad-container,
+    iframe[src*="doubleclick.net"], iframe[src*="googlesyndication"], iframe[src*="adsystem.com"],
+    .sponsored, .spon, .ad-placeholder {
+      display:none !important;
+      visibility:hidden !important;
+      width:0 !important;
+      height:0 !important;
+      margin:0 !important;
+      padding:0 !important;
+      overflow:hidden !important;
+    }
+    /* end ad-block css */
   </style>
 </head>
 <body>
@@ -28,7 +42,10 @@
           <div id="currentTitle" class="title">Kies een kanaal</div>
           <div id="currentMeta" class="meta">—</div>
         </div>
-        <button id="playPause" class="btn">Play</button>
+        <div style="display:flex;gap:8px">
+          <button id="playPause" class="btn">Play</button>
+          <button id="toggleAds" class="btn">Ad-block: Aan</button>
+        </div>
       </div>
       <div class="video-wrap" id="videoWrap">
         <video id="video" controls playsinline webkit-playsinline></video>
@@ -49,11 +66,11 @@
 
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"></script>
   <script>
+    /* ------------------ playlist & player (ongewijzigd, basis uit jouw bestand) ------------------ */
     const playlist = [
       {id:1,type:'hls',url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',title:'Test HLS',logo:'https://picsum.photos/200/120?random=1', description:'<p>Voorbeeld <b>HTML</b> beschrijving voor <i>HLS</i> stream met <a href="https://example.com">link</a>.</p>'},
       {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=6N8_r2uwLEc',title:'YouTube Demo',logo:'https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg', description:'<p>Dit is een <b>YouTube</b> demo video.</p>'},
       {id:2,type:'youtube',url:'https://www.youtube.com/watch?v=JjTeViaVdoI',title:'YouTube Demo',logo:'https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg', description:'<p>Dit is een <b>YouTube</b> demo video.</p>'},
-
       {id:3,type:'hls',url:'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',title:'Sintel Film',logo:'https://picsum.photos/200/120?random=3', description:'<p>Korte film <i>Sintel</i> via HLS.</p>'}
     ];
 
@@ -103,6 +120,8 @@
       });
     }
 
+    function parseYouTubeID(url){ const m=url.match(/(v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/); return m?m[2]:url; }
+
     function playIndex(i){
       if(i<0||i>=playlist.length)return;
       const item=playlist[i]; currentIndex=i;
@@ -132,11 +151,102 @@
       document.getElementById('videoWrap').requestFullscreen?.();
     }
 
-    function parseYouTubeID(url){ const m=url.match(/(v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/); return m?m[2]:url; }
-
     document.getElementById('playPause').addEventListener('click',()=>{ playIndex(0); });
 
     renderPlaylist();
+
+    /* ------------------ AD-BLOCK JAVASCRIPT ------------------ */
+    (function(){
+      // Toggle knop
+      let adBlockEnabled = true;
+      const toggleBtn = document.getElementById('toggleAds');
+      function updateToggleLabel(){ toggleBtn.textContent = adBlockEnabled ? 'Ad-block: Aan' : 'Ad-block: Uit'; }
+      toggleBtn.addEventListener('click', ()=>{ adBlockEnabled = !adBlockEnabled; updateToggleLabel(); });
+      updateToggleLabel();
+
+      // bekende ad-hosts (uitbreidbaar)
+      const adHosts = [
+        'doubleclick.net', 'googlesyndication', 'adservice.google.com', 'adsystem.com', 'adnxs.com', 'ads.youtube.com'
+      ];
+
+      // verwijder nodes die op advertenties lijken
+      function isLikelyAd(node){
+        if(!node) return false;
+        if(node.nodeType !== 1) return false;
+        const id = (node.id || '').toLowerCase();
+        const cls = (node.className || '').toLowerCase();
+        if(id.includes('ad') || cls.includes('ad') || id.includes('sponsored') || cls.includes('sponsored')) return true;
+        if(node.tagName === 'IFRAME' || node.tagName === 'SCRIPT'){
+          const src = (node.getAttribute('src') || '').toLowerCase();
+          if(src){
+            for(const h of adHosts) if(src.includes(h)) return true;
+          }
+        }
+        return false;
+      }
+
+      function removeAdsFrom(root=document.body){
+        if(!adBlockEnabled) return;
+        const candidates = root.querySelectorAll('[id*="ad"], [class*="ad"], .ads, .adslot, iframe, script');
+        candidates.forEach(n=>{
+          if(isLikelyAd(n)){
+            try{ n.remove(); } catch(e){ n.style.display='none'; n.style.visibility='hidden'; }
+          }
+        });
+      }
+
+      // direct verwijderen van bestaande
+      removeAdsFrom(document);
+
+      // observeer nieuwe nodes en filter ze
+      const mo = new MutationObserver(muts=>{
+        if(!adBlockEnabled) return;
+        muts.forEach(m=>{
+          m.addedNodes && m.addedNodes.forEach(node=>{
+            try{
+              if(isLikelyAd(node)) { node.remove(); return; }
+              if(node.querySelectorAll) removeAdsFrom(node);
+            }catch(e){}
+          });
+        });
+      });
+      mo.observe(document.documentElement || document.body, {childList:true, subtree:true});
+
+      // voorkom via DOM API dat scripts/iframes met ad-hosts worden ingevoegd
+      const origAppend = Element.prototype.appendChild;
+      Element.prototype.appendChild = function (node) {
+        try{
+          if(adBlockEnabled && (node.tagName === 'IFRAME' || node.tagName === 'SCRIPT')){
+            const src = (node.getAttribute && node.getAttribute('src') || '').toLowerCase();
+            for(const h of adHosts) if(src.includes(h)) {
+              console.info('Blocked appended ad element:', src);
+              return node; // niet toevoegen
+            }
+          }
+        }catch(e){}
+        return origAppend.call(this, node);
+      };
+
+      // ook intercept insertBefore
+      const origInsertBefore = Element.prototype.insertBefore;
+      Element.prototype.insertBefore = function(node, ref){
+        try{
+          if(adBlockEnabled && (node.tagName === 'IFRAME' || node.tagName === 'SCRIPT')){
+            const src = (node.getAttribute && node.getAttribute('src') || '').toLowerCase();
+            for(const h of adHosts) if(src.includes(h)) {
+              console.info('Blocked inserted ad element:', src);
+              return node;
+            }
+          }
+        }catch(e){}
+        return origInsertBefore.call(this, node, ref);
+      };
+
+      // beveiliging: periodiek opruimen (voor dynamische advertentieinjecties)
+      setInterval(()=>{ if(adBlockEnabled) removeAdsFrom(document); }, 2000);
+    })();
+    /* ------------------ einde ad-block script ------------------ */
+
   </script>
 </body>
 </html>
