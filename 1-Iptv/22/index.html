@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mediaplayer Auto Rotate</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(160deg, #1e293b, #0f172a);
+    }
+  </style>
+</head>
+<body class="text-white font-sans">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center p-4 bg-gray-900/70 sticky top-0 z-40">
+    <h1 class="text-xl font-bold">📺 Mijn Media Player</h1>
+  </header>
+
+  <!-- Player -->
+  <main class="p-4 space-y-10">
+    <div id="playerContainer" class="w-full max-w-3xl mx-auto">
+      <iframe id="playerFrame"
+              src="http://online.hdgo.site/player30/playerjs.html?file=stream1&autoplay=1"
+              class="w-full h-64 sm:h-96 rounded-2xl shadow-2xl border border-gray-700"
+              frameborder="0" allow="autoplay; fullscreen"></iframe>
+    </div>
+
+    <!-- Kanalen lijst -->
+    <section id="categoryContainer" class="space-y-6 max-w-3xl mx-auto">
+      <h2 class="text-xl font-semibold mb-3">🏆 Sport</h2>
+      <div class="flex flex-col space-y-3">
+        <button class="channelCard bg-gray-800/70 rounded-xl p-4 text-left hover:bg-gray-700 transition" 
+                data-url="http://online.hdgo.site/player30/playerjs.html?file=sport1">Sport Kanaal 1</button>
+        <button class="channelCard bg-gray-800/70 rounded-xl p-4 text-left hover:bg-gray-700 transition" 
+                data-url="http://online.hdgo.site/player30/playerjs.html?file=sport2">Sport Kanaal 2</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const playerFrame = document.getElementById("playerFrame");
+    const playerContainer = document.getElementById("playerContainer");
+
+    // Kanaal wisselen
+    function changeChannel(url) {
+      playerFrame.src = url + "&autoplay=1";
+
+      // Scroll naar player
+      setTimeout(() => {
+        playerContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 200);
+
+      // Check of mobiel, dan fullscreen + draaien
+      if (/Mobi|Android/i.test(navigator.userAgent)) {
+        openFullscreen(playerFrame);
+      }
+    }
+
+    // Fullscreen openen en draaien
+    function openFullscreen(element) {
+      const requestFS = element.requestFullscreen 
+        || element.webkitRequestFullscreen 
+        || element.msRequestFullscreen;
+      if (requestFS) {
+        requestFS.call(element).then(() => {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock("landscape").catch(() => {});
+          }
+        }).catch(() => {});
+      }
+    }
+
+    // Event listeners voor kanalen
+    document.querySelectorAll(".channelCard").forEach(card => {
+      card.addEventListener("click", () => changeChannel(card.dataset.url));
+    });
+  </script>
+</body>
+</html>
