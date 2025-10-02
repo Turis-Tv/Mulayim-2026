@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mediaplayer AutoPlay</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(160deg, #1e293b, #0f172a);
+    }
+  </style>
+</head>
+<body class="text-white font-sans">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center p-4 bg-gray-900/70 sticky top-0 z-40">
+ 
+    <button id="menuBtn" class="text-white focus:outline-none">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2"
+           viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round"
+           d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </button>
+  </header>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-gray-900/95 transform -translate-x-full transition-transform duration-300 z-50">
+    <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+      <h2 class="text-lg font-semibold">Categorieën</h2>
+      <button id="closeMenu" class="text-gray-400 hover:text-white">✕</button>
+    </div>
+    <div class="p-4 space-y-4">
+      <button class="catBtn w-full text-left p-2 bg-gray-800 rounded hover:bg-gray-700" data-target="sport">🏆 Sport</button>
+      <button class="catBtn w-full text-left p-2 bg-gray-800 rounded hover:bg-gray-700" data-target="nieuws">📰 Nieuws</button>
+    </div>
+  </aside>
+  <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
+
+  <!-- Main Content -->
+  <main class="p-4 space-y-10">
+
+    <!-- Player -->
+    <div id="playerContainer" class="w-full max-w-3xl mx-auto">
+      <iframe id="playerFrame"
+              src="http://online.hdgo.site/player30/playerjs.html?file=stream1&autoplay=1"
+              class="w-full h-64 sm:h-96 rounded-2xl shadow-2xl border border-gray-700"
+              frameborder="0" allow="autoplay; fullscreen"></iframe>
+    </div>
+
+    <!-- Category Content -->
+    <section id="categoryContainer" class="space-y-6 max-w-3xl mx-auto">
+      <p class="text-gray-400 italic">Kies een categorie uit het menu om kanalen te zien.</p>
+    </section>
+  </main>
+
+  <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    const closeMenu = document.getElementById("closeMenu");
+    const playerFrame = document.getElementById("playerFrame");
+    const playerContainer = document.getElementById("playerContainer");
+    const categoryContainer = document.getElementById("categoryContainer");
+
+    const categories = {
+      sport: {
+        title: "🏆 Sport",
+        channels: [
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" },
+          { name: "Sport Kanaal 2", url: "http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8" }
+        ]
+      },
+      nieuws: {
+        title: "📰 Nieuws",
+        channels: [
+          { name: "Nieuws Kanaal 1", url: "http://online.hdgo.site/player30/playerjs.html?file=nieuws1" },
+          { name: "Nieuws Kanaal 2", url: "http://online.hdgo.site/player30/playerjs.html?file=nieuws2" }
+        ]
+      }
+    };
+
+    // Sidebar open/sluit
+    menuBtn.addEventListener("click", () => {
+      sidebar.classList.remove("-translate-x-full");
+      overlay.classList.remove("hidden");
+    });
+    function closeSidebar() {
+      sidebar.classList.add("-translate-x-full");
+      overlay.classList.add("hidden");
+    }
+    if (closeMenu) closeMenu.addEventListener("click", closeSidebar);
+    overlay.addEventListener("click", closeSidebar);
+
+    // Kanaal wisselen met autoplay
+    function changeChannel(url) {
+      playerFrame.src = url + "&autoplay=1"; // <-- autoplay toegevoegd
+      closeSidebar();
+      setTimeout(() => {
+        playerContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 200);
+    }
+
+    // Toon categorie
+    function showCategory(catKey) {
+      const cat = categories[catKey];
+      if (!cat) return;
+      categoryContainer.innerHTML = `
+        <h2 class="text-xl font-semibold mb-3">${cat.title}</h2>
+        <div class="flex flex-col space-y-3">
+          ${cat.channels.map(ch => `
+            <button class="channelCard bg-gray-800/70 rounded-xl p-4 text-left hover:bg-gray-700 transition" data-url="${ch.url}">
+              ${ch.name}
+            </button>`).join("")}
+        </div>
+      `;
+      document.querySelectorAll(".channelCard").forEach(card => {
+        card.addEventListener("click", () => changeChannel(card.dataset.url));
+      });
+    }
+
+    // Categorie-knoppen
+    document.querySelectorAll(".catBtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        showCategory(btn.dataset.target);
+        closeSidebar();
+        setTimeout(() => {
+          categoryContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 200);
+      });
+    });
+  </script>
+</body>
+</html>
