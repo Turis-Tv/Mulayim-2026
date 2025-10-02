@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mediaplayer met Mooie Categorieën</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(160deg, #1e293b, #0f172a);
+    }
+    iframe {
+      background: black;
+    }
+    /* Scrollbare categorieën op mobiel */
+    .category-bar {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .category-bar::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="text-white font-sans">
+
+  <!-- Header -->
+  <header class="p-4 bg-gray-900/70 sticky top-0 z-40 shadow-lg">
+    <h1 class="text-lg sm:text-xl font-bold text-center">📺 Mijn Media Player</h1>
+  </header>
+
+  <!-- Categorieën als knoppen -->
+  <div class="category-bar flex space-x-3 p-3 bg-gray-800/70 shadow-md sticky top-[60px] z-30">
+    <button class="categoryBtn bg-blue-600 px-4 py-2 rounded-full font-medium whitespace-nowrap" data-category="all">📂 Alle</button>
+    <button class="categoryBtn bg-gray-700 px-4 py-2 rounded-full font-medium whitespace-nowrap" data-category="sport">🏆 Sport</button>
+    <button class="categoryBtn bg-gray-700 px-4 py-2 rounded-full font-medium whitespace-nowrap" data-category="news">📰 Nieuws</button>
+    <button class="categoryBtn bg-gray-700 px-4 py-2 rounded-full font-medium whitespace-nowrap" data-category="music">🎵 Muziek</button>
+  </div>
+
+  <!-- Player -->
+  <main class="p-4 space-y-10">
+    <div id="playerContainer" class="w-full max-w-3xl mx-auto">
+      <iframe id="playerFrame"
+              src=""
+              class="w-full h-64 sm:h-96 rounded-2xl shadow-2xl border border-gray-700 hidden"
+              frameborder="0"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              allowfullscreen></iframe>
+    </div>
+
+    <!-- Kanaal lijst -->
+    <section id="channels" class="space-y-6 max-w-3xl mx-auto">
+
+      <!-- Sport -->
+      <div class="categoryGroup" data-category="sport">
+        <h2 class="text-xl font-semibold mb-3">🏆 Sport</h2>
+        <div class="flex flex-col space-y-3">
+          <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                  data-url="http://online.hdgo.site/player30/playerjs.html?file=sport1">Sport Kanaal 1</button>
+          <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                  data-url="http://online.hdgo.site/player30/playerjs.html?file=sport2">Sport Kanaal 2</button>
+        </div>
+      </div>
+
+      <!-- Nieuws -->
+      <div class="categoryGroup" data-category="news">
+        <h2 class="text-xl font-semibold mb-3">📰 Nieuws</h2>
+        <div class="flex flex-col space-y-3">
+          <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                  data-url="http://online.hdgo.site/player30/playerjs.html?file=news1">Nieuws Kanaal 1</button>
+          <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                  data-url="http://online.hdgo.site/player30/playerjs.html?file=news2">Nieuws Kanaal 2</button>
+        </div>
+      </div>
+
+      <!-- Muziek -->
+      <div class="categoryGroup" data-category="music">
+        <h2 class="text-xl font-semibold mb-3">🎵 Muziek</h2>
+        <div class="flex flex-col space-y-3">
+          <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                  data-url="http://online.hdgo.site/player30/playerjs.html?file=music1">Muziek Kanaal 1</button>
+          <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                  data-url="http://online.hdgo.site/player30/playerjs.html?file=music2">Muziek Kanaal 2</button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    const playerFrame = document.getElementById("playerFrame");
+    const playerContainer = document.getElementById("playerContainer");
+
+    // Kanaal starten
+    function changeChannel(url) {
+      const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        window.open(url + "&autoplay=1", "_blank");
+      } else {
+        playerFrame.classList.remove("hidden");
+        playerFrame.src = url + "&autoplay=1";
+        setTimeout(() => {
+          playerContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 200);
+      }
+    }
+
+    // Event listeners voor kanalen
+    document.querySelectorAll(".channelCard").forEach(card => {
+      card.addEventListener("click", () => changeChannel(card.dataset.url));
+    });
+
+    // Categorie filter
+    const categoryBtns = document.querySelectorAll(".categoryBtn");
+    categoryBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const selected = btn.dataset.category;
+
+        // Knoppen styling aanpassen
+        categoryBtns.forEach(b => b.classList.remove("bg-blue-600"));
+        categoryBtns.forEach(b => b.classList.add("bg-gray-700"));
+        btn.classList.remove("bg-gray-700");
+        btn.classList.add("bg-blue-600");
+
+        // Filteren
+        document.querySelectorAll(".categoryGroup").forEach(group => {
+          if (selected === "all" || group.dataset.category === selected) {
+            group.style.display = "block";
+          } else {
+            group.style.display = "none";
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

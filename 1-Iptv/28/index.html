@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mediaplayer Verticaal Mobiel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(160deg, #1e293b, #0f172a);
+    }
+    iframe {
+      background: black;
+    }
+  </style>
+</head>
+<body class="text-white font-sans">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center p-4 bg-gray-900 sticky top-0 z-50">
+ 
+  </header>
+
+  <!-- Player -->
+  <main class="p-4 space-y-10">
+    <div id="playerContainer" class="w-full max-w-3xl mx-auto">
+      <iframe id="playerFrame"
+              src=""
+              class="w-full h-64 sm:h-96 rounded-2xl shadow-2xl border border-gray-700 hidden"
+              frameborder="0"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              allowfullscreen></iframe>
+    </div>
+
+    <!-- Kanalen -->
+    <section class="space-y-6 max-w-3xl mx-auto">
+      <h2 class="text-xl font-semibold mb-3">🏆 Sport</h2>
+      <div class="flex flex-col space-y-3">
+        <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                data-url="http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8">kral</button>
+        <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                data-url="http://online.hdgo.site/player30/playerjs.html?file=https://listen.powerapp.com.tr/pturkslow/slow.smil/playlist.m3u8">taptaze</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const playerFrame = document.getElementById("playerFrame");
+    const playerContainer = document.getElementById("playerContainer");
+
+    // Kanaal starten
+    function changeChannel(url) {
+      const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+      // Zet player src
+      playerFrame.classList.remove("hidden");
+      playerFrame.src = url + "&autoplay=1";
+
+      // Scroll naar player
+      setTimeout(() => {
+        playerContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 200);
+
+      if (isMobile) {
+        // Probeer fullscreen en verticale lock
+        openVertical(playerFrame);
+      }
+    }
+
+    // Fullscreen + vertical orientation
+    async function openVertical(element) {
+      let req = element.requestFullscreen || element.webkitRequestFullscreen || element.msRequestFullscreen;
+      if (req) {
+        try {
+          await req.call(element);
+          if (screen.orientation && screen.orientation.lock) {
+            await screen.orientation.lock("portrait");
+          }
+        } catch (e) {
+          console.log("Fullscreen of orientation lock niet toegestaan:", e);
+        }
+      }
+    }
+
+    // Event listeners voor kanalen
+    document.querySelectorAll(".channelCard").forEach(card => {
+      card.addEventListener("click", () => changeChannel(card.dataset.url));
+    });
+  </script>
+</body>
+</html>

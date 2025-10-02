@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mediaplayer met Hamburger Categorieën</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(160deg, #1e293b, #0f172a);
+    }
+    iframe {
+      background: black;
+    }
+    .menu-hidden {
+      transform: translateX(-100%);
+    }
+  </style>
+</head>
+<body class="text-white font-sans">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center p-4 bg-gray-900 sticky top-0 z-50">
+    <!-- Hamburger -->
+    <button id="menuToggle" class="text-2xl">&#9776;</button>
+    <h1 class="text-lg sm:text-xl font-bold">📺 Mijn Media Player</h1>
+  </header>
+
+  <!-- Zijmenu categorieën -->
+  <nav id="sideMenu" class="fixed top-0 left-0 h-full w-64 bg-gray-800 shadow-xl z-40 p-5 transition-transform menu-hidden">
+    <h2 class="text-xl font-semibold mb-6">Categorieën</h2>
+    <ul class="space-y-4">
+      <li><button class="categoryBtn w-full text-left bg-gray-700 px-4 py-2 rounded-lg" data-category="all">📂 Alle</button></li>
+      <li><button class="categoryBtn w-full text-left bg-gray-700 px-4 py-2 rounded-lg" data-category="sport">🏆 Sport</button></li>
+      <li><button class="categoryBtn w-full text-left bg-gray-700 px-4 py-2 rounded-lg" data-category="news">📰 Nieuws</button></li>
+      <li><button class="categoryBtn w-full text-left bg-gray-700 px-4 py-2 rounded-lg" data-category="music">🎵 Muziek</button></li>
+    </ul>
+  </nav>
+
+  <!-- Overlay achter menu -->
+  <div id="overlay" class="fixed inset-0 bg-black/50 z-30 hidden"></div>
+
+  <!-- Player -->
+  <main class="p-4 space-y-10">
+    <div id="playerContainer" class="w-full max-w-3xl mx-auto">
+      <iframe id="playerFrame"
+              src=""
+              class="w-full h-64 sm:h-96 rounded-2xl shadow-2xl border border-gray-700 hidden"
+              frameborder="0"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              allowfullscreen></iframe>
+    </div>
+
+    <!-- Kanalen -->
+    <section id="channels" class="space-y-6 max-w-3xl mx-auto">
+
+      <!-- Sport -->
+      <div class="categoryGroup" data-category="sport">
+        <h2 class="text-xl font-semibold mb-3">🏆 Sport</h2>
+        <div class="flex flex-col space-y-3">
+          <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                  data-url="http://online.hdgo.site/player30/playerjs.html?file=sport1">Sport Kanaal 1</button>
+          <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                  data-url="http://online.hdgo.site/player30/playerjs.html?file=sport2">Sport Kanaal 2</button>
+        </div>
+      </div>
+
+      <!-- Nieuws -->
+      <div class="categoryGroup" data-category="news">
+        <h2 class="text-xl font-semibold mb-3">📰 Nieuws</h2>
+        <div class="flex flex-col space-y-3">
+          <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                  data-url="http://online.hdgo.site/player30/playerjs.html?file=news1">Nieuws Kanaal 1</button>
+          <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                  data-url="http://online.hdgo.site/player30/playerjs.html?file=news2">Nieuws Kanaal 2</button>
+        </div>
+      </div>
+
+      <!-- Muziek -->
+      <div class="categoryGroup" data-category="music">
+        <h2 class="text-xl font-semibold mb-3">🎵 Muziek</h2>
+        <div class="flex flex-col space-y-3">
+          <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                  data-url="http://online.hdgo.site/player30/playerjs.html?file=music1">Muziek Kanaal 1</button>
+          <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                  data-url="http://online.hdgo.site/player30/playerjs.html?file=music2">Muziek Kanaal 2</button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    const menuToggle = document.getElementById("menuToggle");
+    const sideMenu = document.getElementById("sideMenu");
+    const overlay = document.getElementById("overlay");
+    const playerFrame = document.getElementById("playerFrame");
+    const playerContainer = document.getElementById("playerContainer");
+
+    // Menu open/close
+    menuToggle.addEventListener("click", () => {
+      sideMenu.classList.toggle("menu-hidden");
+      overlay.classList.toggle("hidden");
+    });
+    overlay.addEventListener("click", () => {
+      sideMenu.classList.add("menu-hidden");
+      overlay.classList.add("hidden");
+    });
+
+    // Kanaal afspelen
+    function changeChannel(url) {
+      const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        window.open(url + "&autoplay=1", "_blank");
+      } else {
+        playerFrame.classList.remove("hidden");
+        playerFrame.src = url + "&autoplay=1";
+        setTimeout(() => {
+          playerContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 200);
+      }
+    }
+
+    // Kanaal klik events
+    document.querySelectorAll(".channelCard").forEach(card => {
+      card.addEventListener("click", () => changeChannel(card.dataset.url));
+    });
+
+    // Categorie filter
+    document.querySelectorAll(".categoryBtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const selected = btn.dataset.category;
+
+        // Menu sluiten na klik
+        sideMenu.classList.add("menu-hidden");
+        overlay.classList.add("hidden");
+
+        // Filter categorieën
+        document.querySelectorAll(".categoryGroup").forEach(group => {
+          if (selected === "all" || group.dataset.category === selected) {
+            group.style.display = "block";
+          } else {
+            group.style.display = "none";
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
