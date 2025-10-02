@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mediaplayer met Terugkeren</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(160deg, #1e293b, #0f172a);
+    }
+  </style>
+</head>
+<body class="text-white font-sans">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center p-4 bg-gray-900 sticky top-0 z-50">
+    <h1 class="text-lg sm:text-xl font-bold">📺 Mijn Media Player</h1>
+  </header>
+
+  <!-- Player -->
+  <main class="p-4 space-y-10">
+    <div id="playerContainer" class="w-full max-w-3xl mx-auto relative">
+      <iframe id="playerFrame"
+              src=""
+              class="w-full h-64 sm:h-96 rounded-2xl shadow-2xl border border-gray-700 hidden"
+              frameborder="0"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              allowfullscreen></iframe>
+
+      <!-- Sluit knop -->
+      <button id="closePlayer" class="hidden absolute top-2 right-2 bg-red-600 px-3 py-1 rounded-lg shadow">
+        ✖ Sluiten
+      </button>
+    </div>
+
+    <!-- Kanalen -->
+    <section id="channels" class="space-y-6 max-w-3xl mx-auto">
+      <h2 class="text-xl font-semibold mb-3">🏆 Sport</h2>
+      <div class="flex flex-col space-y-3">
+        <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                data-url="http://online.hdgo.site/player30/playerjs.html?file=sport1">Sport Kanaal 1</button>
+        <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                data-url="http://online.hdgo.site/player30/playerjs.html?file=sport2">Sport Kanaal 2</button>
+      </div>
+
+      <h2 class="text-xl font-semibold mb-3">📰 Nieuws</h2>
+      <div class="flex flex-col space-y-3">
+        <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                data-url="http://online.hdgo.site/player30/playerjs.html?file=https://meclistv-live.ercdn.net/meclistv/meclistv.m3u8">meclis</button>
+        <button class="channelCard bg-gray-800/70 rounded-xl p-4 hover:bg-gray-700 transition" 
+                data-url="http://online.hdgo.site/player30/playerjs.html?file=https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_360p.m3u8">kral</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const playerFrame = document.getElementById("playerFrame");
+    const playerContainer = document.getElementById("playerContainer");
+    const closeBtn = document.getElementById("closePlayer");
+
+    let lastScrollY = 0; // opslaan van laatste positie
+
+    // Kanaal starten
+    function changeChannel(url) {
+      // Opslaan huidige scrollpositie
+      lastScrollY = window.scrollY;
+
+      playerFrame.classList.remove("hidden");
+      closeBtn.classList.remove("hidden");
+      playerFrame.src = url + "&autoplay=1";
+
+      // Scroll naar de player
+      setTimeout(() => {
+        playerContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 200);
+    }
+
+    // Sluit player en keer terug
+    function closePlayer() {
+      playerFrame.src = "";
+      playerFrame.classList.add("hidden");
+      closeBtn.classList.add("hidden");
+
+      // Scroll terug naar vorige positie
+      window.scrollTo({ top: lastScrollY, behavior: "smooth" });
+    }
+
+    // Event listeners
+    document.querySelectorAll(".channelCard").forEach(card => {
+      card.addEventListener("click", () => changeChannel(card.dataset.url));
+    });
+
+    closeBtn.addEventListener("click", closePlayer);
+  </script>
+</body>
+</html>
