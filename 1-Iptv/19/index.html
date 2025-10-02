@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Mooie Video Website</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="p-6 bg-gray-900/80 backdrop-blur sticky top-0 z-20 shadow-lg text-center">
+ 
+ 
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1 p-6 space-y-12 max-w-6xl mx-auto">
+
+    <!-- Sectie Muziek Hits -->
+    <section>
+    
+      <div class="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+
+        <!-- Kaartje -->
+        <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition text-center">
+          <img src="https://img.youtube.com/vi/JjTeViaVdoI/maxresdefault.jpg"
+               alt="Zeynep Şimşek "
+               class="w-full h-40 object-cover cursor-pointer"
+               onclick="openPlayer('JjTeViaVdoI')">
+          <div class="p-3">
+            <p class="text-sm font-medium">Evlerinin Önü Yoldur Yolaktır</p>
+          </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition text-center">
+          <img src="https://img.youtube.com/vi/byUuAxjfP2M/maxresdefault.jpg"
+               alt="Zeynep Şimşek"
+               class="w-full h-40 object-cover cursor-pointer"
+               onclick="openPlayer('byUuAxjfP2M')">
+          <div class="p-3">
+            <p class="text-sm font-medium">Emminem</p>
+          </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition text-center">
+          <img src="https://img.youtube.com/vi/qaxtyajdjmc/maxresdefault.jpg"
+               alt="Zeynep Şimşek"
+               class="w-full h-40 object-cover cursor-pointer"
+               onclick="openPlayer('qaxtyajdjmc')">
+          <div class="p-3">
+            <p class="text-sm font-medium">Kar Yağar Kar Üstüne</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Sectie Aanbevolen -->
+    <section>
+      <h2 class="text-2xl font-bold mb-6 border-b border-gray-700 pb-2">🔥 Aanbevolen Video’s</h2>
+      <div class="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+
+        <!-- Extra kaartje voorbeeld -->
+        <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition text-center">
+          <img src="https://img.youtube.com/vi/c1h68yMxb3I/maxresdefault.jpg"
+               alt="Zeynep Şimşek"
+               class="w-full h-40 object-cover cursor-pointer"
+               onclick="openPlayer('c1h68yMxb3I')">
+          <div class="p-3">
+            <p class="text-sm font-medium">Makaram Sarı Bağlar</p>
+          </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition text-center">
+          <img src="https://img.youtube.com/vi/gb__1TCkixo/maxresdefault.jpg"
+               alt="Zeynep Şimşek"
+               class="w-full h-40 object-cover cursor-pointer"
+               onclick="openPlayer('gb__1TCkixo')">
+          <div class="p-3">
+            <p class="text-sm font-medium">Vay Nene</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Overlay Player -->
+  <div id="overlay" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-30 p-4">
+    <div class="relative w-full max-w-4xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
+      <iframe id="videoFrame" class="absolute inset-0 w-full h-full" frameborder="0"
+        allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        allowfullscreen></iframe>
+    </div>
+    <button onclick="closePlayer()" 
+            class="absolute top-6 right-6 bg-red-600 px-5 py-2 rounded-lg font-semibold shadow-lg">
+      ✕ Sluiten
+    </button>
+  </div>
+
+  <!-- Footer -->
+  <footer class="p-6 text-center text-gray-500 text-sm">
+    © 2026  Video Website · Gemaakt door Turis Tv ❤️ en CSS
+  </footer>
+
+  <script>
+    function embedSrc(id) {
+      return "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id) + "?rel=0&modestbranding=1&autoplay=1";
+    }
+    function openPlayer(id) {
+      document.getElementById("videoFrame").src = embedSrc(id);
+      document.getElementById("overlay").classList.remove("hidden");
+      document.getElementById("overlay").classList.add("flex");
+    }
+    function closePlayer() {
+      document.getElementById("videoFrame").src = "";
+      document.getElementById("overlay").classList.remove("flex");
+      document.getElementById("overlay").classList.add("hidden");
+    }
+  </script>
+</body>
+</html>
