@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TV Player met Animated Background & Playlist</title>
+  <style>
+    body {
+      margin:0;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-family: Arial, sans-serif;
+      color:#fff;
+      overflow:hidden;
+      background: linear-gradient(270deg, #1e3c72, #2a5298, #ff7e5f, #feb47b);
+      background-size: 800% 800%;
+      animation: gradientMove 20s ease infinite;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Video styling */
+    video {
+      width:90%;
+      max-width:1000px;
+      border-radius:15px;
+      box-shadow:0 0 25px rgba(0,0,0,0.5);
+      background: transparent;
+      cursor:pointer; /* klikbaar */
+    }
+
+    /* Hamburger button */
+    .hamburger {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 2000;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .hamburger span {
+      height: 4px;
+      background: #fff;
+      border-radius: 2px;
+      transition: 0.3s;
+    }
+
+    /* Transparante Sidebar menu */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -260px;
+      width: 250px;
+      height: 100%;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      transition: left 0.3s ease;
+      padding: 60px 20px;
+      border-right: 1px solid rgba(255,255,255,0.3);
+      z-index: 1500;
+    }
+
+    .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar h2 {
+      margin-top:0;
+      margin-bottom:15px;
+      font-size:20px;
+      border-bottom:1px solid rgba(255,255,255,0.3);
+      padding-bottom:10px;
+    }
+
+    .playlist a {
+      display:block;
+      padding:10px;
+      margin:5px 0;
+      color:#fff;
+      text-decoration:none;
+      border-radius:8px;
+      transition: background 0.2s;
+      font-size:16px;
+    }
+
+    .playlist a:hover {
+      background: rgba(255,255,255,0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hamburger -->
+  <div class="hamburger" id="hamburger">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <!-- Sidebar Playlist (transparant) -->
+  <div class="sidebar" id="sidebar">
+    <h2>Kanalen</h2>
+    <div class="playlist">
+      <a href="#" data-url="http://origi-jw-5.ravenclaw-house.com:80/TR-TRT1/tracks-v1a1/mono.m3u8">TRT 1</a>
+      <a href="#" data-url="https://one.b2a7fa109ef84a6f.click/live/sbeinsports-1/playlist.m3u8">BEIN SPORT 1</a>
+      <a href="#" data-url="https://one.b2a7fa109ef84a6f.click/live/sbeinsports-2/playlist.m3u8">BEIN SPORT 2</a>
+      <a href="#" data-url="https://one.b2a7fa109ef84a6f.click/live/sbeinsports-3/playlist.m3u8">BEIN SPORT 3</a>
+
+    </div>
+  </div>
+
+  <!-- Video player -->
+  <video id="video" controls playsinline></video>
+
+  <!-- HLS.js -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+    const video = document.getElementById('video');
+
+    // Hamburger toggle
+    hamburger.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+
+    // Klik op video → open playlist
+    video.addEventListener('click', () => {
+      sidebar.classList.add('open');
+    });
+
+    // Playlist click
+    document.querySelectorAll('.playlist a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const url = link.getAttribute('data-url');
+        playChannel(url);
+        sidebar.classList.remove('open'); 
+        openFullscreen(video); // direct fullscreen
+      });
+    });
+
+    // HLS.js player functie
+    let hls;
+    function playChannel(url){
+      if(hls){ hls.destroy(); }
+      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        video.play().catch(()=>{});
+      } else if (Hls.isSupported()) {
+        hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(()=>{});
+        });
+      } else {
+        alert("Deze browser ondersteunt geen HLS.js");
+      }
+    }
+
+    // Fullscreen functie
+    function openFullscreen(elem) {
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) { 
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) { 
+        elem.msRequestFullscreen();
+      }
+    }
+
+    // Start met eerste kanaal
+    playChannel(document.querySelector('.playlist a').getAttribute('data-url'));
+  </script>
+</body>
+</html>
