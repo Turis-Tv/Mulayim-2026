@@ -1,0 +1,177 @@
+ <!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Film website — M3U8 player & playlist</title>
+  <style>
+    :root{--bg:#0f1724;--panel:#0b1220;--accent:#ff6b6b;--muted:#94a3b8;--card:#0e1622}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#071026);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial}
+    .app{display:flex;height:100vh;gap:18px;padding:20px;box-sizing:border-box}
+    .left{flex:1;display:flex;flex-direction:column;gap:12px}
+    .player-card{background:linear-gradient(180deg,var(--card),#021126);border-radius:12px;padding:12px;box-shadow:0 6px 24px rgba(2,6,23,.6);display:flex;flex-direction:column}
+    video{width:100%;height:30vh;max-height:40vh;border-radius:8px;background:#000;outline:2px solid rgba(255,255,255,.02)}
+    .controls{display:flex;gap:1px;align-items:center;margin-top:1px}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,.06);padding:8px 12px;border-radius:8px;color:#e6eef8;cursor:pointer}
+    .btn:hover{border-color:var(--accent)}
+    .info{color:var(--muted);font-size:13px;margin-top:6px}
+
+    .right{width:320px;background:rgba(255,255,255,.02);border-radius:12px;padding:12px;display:flex;flex-direction:column}
+    .playlist-title{color:#e6eef8;font-weight:600;margin-bottom:8px}
+    .playlist{overflow:auto;flex:1;padding-right:6px}
+    .item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:8px;margin-bottom:8px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.01));cursor:pointer}
+    .item:hover{background:rgba(255,255,255,.02)}
+    .item.active{box-shadow:inset 0 0 0 2px rgba(255,107,107,.12);border-left:4px solid var(--accent);}
+    .thumb{width:64px;height:40px;background:linear-gradient(90deg,#0b1a2b,#062033);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px}
+    .meta{flex:1}
+    .title{color:#e6eef8;font-weight:600}
+    .sub{color:var(--muted);font-size:12px}
+
+    @media (max-width:900px){.app{flex-direction:column}.right{width:100%;height:260px}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="left">
+      <div class="player-card">
+        <video id="player" controls crossorigin playsinline></video>
+        <div class="controls">
+          <button id="playPause" class="btn">Play/Pauze</button>
+          <button id="mute" class="btn">Mute</button>
+          <select id="quality" class="btn">
+            <option value="auto">Auto</option>
+          </select>
+          <button id="pip" class="btn">PIP</button>
+        </div>
+        <div class="info" id="now"> </div>
+      </div>
+    </div>
+
+    <aside class="right">
+  
+      <div class="playlist" id="playlist">
+        <!-- Playlist items injected by JS -->
+      </div>
+       
+    </aside>
+  </div>
+
+  <!-- HLS.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.7/dist/hls.min.js"></script>
+  <script>
+    // Voorbeeld playlist. Vervang de url's met jouw m3u8 links.
+    const playlistData = [
+      {id:1,title:'turis ',sub:' ',url:'https://tv-trt1.medya.trt.com.tr/master.m3u8'},
+      {id:1,title:'tu ',sub:' ',url:'https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv.m3u8'},
+      {id:1,title:'tu ',sub:' ',url:'https://ackaxsqacw.turknet.ercdn.net/ozfkfbbjba/kanald/kanald.m3u8'},
+      {id:1,title:'tu ',sub:' ',url:'https://emmazbvkkf.turknet.ercdn.net/cnifuowzza/startv/startv.m3u8'}
+    ];
+
+    const player = document.getElementById('player');
+    const playlistEl = document.getElementById('playlist');
+    const nowEl = document.getElementById('now');
+    const qualitySelect = document.getElementById('quality');
+    const playPauseBtn = document.getElementById('playPause');
+    const muteBtn = document.getElementById('mute');
+    const pipBtn = document.getElementById('pip');
+
+    let hls = null;
+    let currentIndex = -1;
+
+    function createPlaylist(){
+      playlistData.forEach((it, i)=>{
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.dataset.index = i;
+        div.innerHTML = `
+          <div class="thumb">Poster</div>
+          <div class="meta">
+            <div class="title">${it.title}</div>
+            <div class="sub">${it.sub}</div>
+          </div>
+        `;
+        div.addEventListener('click', ()=> loadIndex(i));
+        playlistEl.appendChild(div);
+      });
+    }
+
+    function clearActive(){
+      document.querySelectorAll('.item').forEach(n=>n.classList.remove('active'));
+    }
+
+    function loadIndex(i){
+      const entry = playlistData[i];
+      if(!entry) return;
+      currentIndex = i;
+      clearActive();
+      const el = document.querySelector(`.item[data-index="${i}"]`);
+      if(el) el.classList.add('active');
+
+      nowEl.textContent = ` ${entry.title}   ${entry.sub}`;
+
+      // Destroy previous hls instance
+      if(hls){ hls.destroy(); hls = null; }
+
+      // If browser supports native HLS (iOS Safari), set src directly
+      if(player.canPlayType('application/vnd.apple.mpegurl')){
+        player.src = entry.url;
+        player.play().catch(()=>{});
+      } else if (Hls.isSupported()){
+        hls = new Hls({enableWorker:true});
+        hls.loadSource(entry.url);
+        hls.attachMedia(player);
+        hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
+          populateQuality(data.levels);
+          player.play().catch(()=>{});
+        });
+        hls.on(Hls.Events.LEVEL_SWITCHED, ()=>updateQualitySelection());
+      } else {
+        alert('Deze browser ondersteunt geen HLS-afspelen. Gebruik Chrome, Firefox of Safari.');
+      }
+    }
+
+    function populateQuality(levels){
+      qualitySelect.innerHTML = '<option value="auto">Auto</option>' + levels.map((l,idx)=>`<option value="${idx}">${l.height?l.height+'p':'level '+idx}</option>`).join('');
+    }
+
+    function updateQualitySelection(){
+      if(!hls) return;
+      const level = hls.currentLevel;
+      qualitySelect.value = (level === -1) ? 'auto' : String(level);
+    }
+
+    qualitySelect.addEventListener('change', ()=>{
+      if(!hls) return;
+      if(qualitySelect.value === 'auto'){
+        hls.currentLevel = -1; // auto
+      } else {
+        hls.currentLevel = parseInt(qualitySelect.value,10);
+      }
+    });
+
+    playPauseBtn.addEventListener('click', ()=>{
+      if(player.paused) player.play(); else player.pause();
+    });
+
+    muteBtn.addEventListener('click', ()=>{ player.muted = !player.muted; muteBtn.textContent = player.muted ? 'Unmute' : 'Mute'; });
+
+    pipBtn.addEventListener('click', async ()=>{
+      try{
+        if (document.pictureInPictureElement) await document.exitPictureInPicture();
+        else await player.requestPictureInPicture();
+      }catch(e){ console.warn('PIP niet beschikbaar',e); }
+    });
+
+    // start
+    createPlaylist();
+    // Option: automatisch de eerste laden
+    // loadIndex(0);
+
+    // Tooltip-ish: detect errors
+    player.addEventListener('error', ()=>{
+      nowEl.textContent = 'Er trad een fout op bij het laden van de stream. Controleer CORS en of de URL geldig is.';
+    });
+
+  </script>
+</body>
+</html>

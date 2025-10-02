@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Turis TV - Sports Channel</title>
+  <link href="https://fonts.googleapis.com/css?family=Work+Sans:400,600,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+    :root{
+      --card-radius: 12px;
+      --card-bg: #0f0f0f;
+      --muted: #cfcfcf;
+    }
+
+    body {
+      font-family: 'Work Sans', sans-serif;
+      background-color: #111;
+      color: #fff;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .navbar {
+      background: #1a1a1a;
+    }
+    .navbar-brand span {
+      color: #ffc107;
+    }
+
+    /* Cards */
+    .card {
+      border: none;
+      border-radius: var(--card-radius);
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+    }
+
+    /* Zorg dat ratio container de image volledig vult */
+    .ratio img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover; /* belangrijk: snijdt bij om te vullen zonder uitrekken */
+    }
+
+    .card-body {
+      padding: 0.8rem;
+      margin-top: auto;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      text-align: center;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 0.55rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Grotere knoppen op mobiel voor betere touch targets */
+    .btn-sm {
+      padding: 0.45rem 0.9rem;
+      font-size: 0.92rem;
+      border-radius: 10px;
+    }
+
+    /* Responsieve aanpassingen */
+    @media (max-width: 576px) {
+      .card-title { font-size: 0.95rem; }
+      .ratio-4x3 { /* iets hogere kaarten op zeer kleine schermen */
+        aspect-ratio: 4 / 3;
+      }
+      .container { padding-left: 0.5rem; padding-right: 0.5rem; }
+    }
+
+    footer {
+      text-align: center;
+      padding: 18px 10px;
+      margin-top: 30px;
+      background: #1a1a1a;
+      color: #cfcfcf;
+      font-size: 0.95rem;
+      border-top: 1px solid rgba(255,255,255,0.02);
+    }
+
+    /* Make default bootstrap toggler-icon visible on dark background fallback */
+    .navbar-dark .navbar-toggler-icon {
+      background-image: none; /* we use font-awesome icon instead */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigatie -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#">Turis<span>TV</span></a>
+
+      <!-- Toggler: verbeterde aria attributen + Font Awesome fallback -->
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon" aria-hidden="true">
+          <i class="fa fa-bars" style="font-size:1.1rem;color:#fff"></i>
+        </span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../index.html">Ana Sayfa</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Spor</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Filmler</a></li>
+
+
+
+
+
+
+          <li class="nav-item"><a class="nav-link text-danger" href="http://action_exit"><i class="fa fa-sign-out-alt"></i> Çıkış</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <div class="container py-4">
+    <div class="row g-3">
+
+      <!-- Her item: col-6 op xs, col-md-3 op md -->
+      <!-- IPTV -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100">
+          <div class="ratio ratio-4x3">
+            <a href="1/index.html" aria-label="Open IPTV">
+              <picture>
+                <img loading="lazy" decoding="async" src="https://od.lk/s/NzJfNDc2NjMyMjdf/izle-1.png" alt="İzle 1" class="card-img-top">
+              </picture>
+            </a>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">İzle 1</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spor -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100">
+          <div class="ratio ratio-4x3">
+            <a href="2/index.html" aria-label="Open Spor">
+              <picture>
+                <img loading="lazy" decoding="async" src="https://od.lk/s/NzJfNDc2NjMzMDlf/izle-2.png" alt="İzle 2" class="card-img-top">
+              </picture>
+            </a>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">İzle 2</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Muzik -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100">
+          <div class="ratio ratio-4x3">
+            <a href="3/index.html" aria-label="Open Müzik">
+              <picture>
+                <img loading="lazy" decoding="async" src="https://od.lk/s/NzJfNDc2NjMyMzVf/izle-3.png" alt="İzle 3" class="card-img-top">
+              </picture>
+            </a>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">İzle 3</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filmler -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100">
+          <div class="ratio ratio-4x3">
+            <a href="4/index.html" aria-label="Open Filmler">
+              <picture>
+                <img loading="lazy" decoding="async" src="https://od.lk/s/NzJfNDc2NjMyMzhf/izle-4-1.png" alt="İzle 4" class="card-img-top">
+              </picture>
+            </a>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">İzle 4</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dini -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100">
+          <div class="ratio ratio-4x3">
+            <a href="5/index.html" aria-label="Open Dini">
+              <picture>
+                <img loading="lazy" decoding="async" src="https://od.lk/s/NzJfNDc2NjMyNDFf/izle-5-1.png" alt="İzle 5" class="card-img-top">
+              </picture>
+            </a>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">İzle 5</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Youtube -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100">
+          <div class="ratio ratio-4x3">
+            <a href="6/index.html" aria-label="Open YouTube">
+              <picture>
+                <img loading="lazy" decoding="async" src="https://od.lk/s/NzJfNDc2NjMyNDRf/izle-6-1.png" alt="İzle 6" class="card-img-top">
+              </picture>
+            </a>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">İzle 6</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Radyolar -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100">
+          <div class="ratio ratio-4x3">
+            <a href="7/index.html" aria-label="Open Radyolar">
+              <picture>
+                <img loading="lazy" decoding="async" src="https://od.lk/s/NzJfNDc2NjMyNDZf/izle-7.png" alt="İzle 7" class="card-img-top">
+              </picture>
+            </a>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">İzle 7</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Player Indir -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100">
+          <div class="ratio ratio-4x3">
+            <a href="8/index.html" aria-label="Open Player'ler İndir">
+              <picture>
+                <img loading="lazy" decoding="async" src="https://od.lk/s/NzJfNDc2NjMyNDhf/izle-8-1.png" alt="İzle 8 class="card-img-top">
+              </picture>
+            </a>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">İzle 8</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Maçlar -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100">
+          <div class="ratio ratio-4x3">
+            <a href="9/index.html" aria-label="Open Maçlar">
+              <picture>
+                <img loading="lazy" decoding="async" src="https://od.lk/s/NzJfNDc2NjMyNTBf/izle-9-1.png" alt="İzle 9" class="card-img-top">
+              </picture>
+            </a>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">İzle 9</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- WhatsApp -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100">
+          <div class="ratio ratio-4x3">
+            <a href="10-Whatsapp/index.html" aria-label="Open WhatsApp İletişim">
+              <picture>
+                <img loading="lazy" decoding="async" src="https://od.lk/s/NzJfNDc2NjMyNTJf/izle-10-1.png" alt="İzle 10" class="card-img-top">
+              </picture>
+            </a>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">İzle 10</h5>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Çıkış -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100">
+          <div class="ratio ratio-4x3">
+            <a href="http://action_exit" aria-label="Çıkış">
+              <picture>
+                <img loading="lazy" decoding="async" src="https://od.lk/s/NzJfNDc2NjMzMjRf/cikis-1.png" alt="Çıkış" class="card-img-top">
+              </picture>
+            </a>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title text-danger">Çıkış Yap</h5>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 TurisTV - Tüm Hakları Saklıdır.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Zorg dat het collapse-menu automatisch sluit als je op een link klikt (mobiel)
+    (function () {
+      var navCollapse = document.getElementById('navbarNav');
+      if (!navCollapse) return;
+
+      // Gebruik bootstrap Collapse API: maak instance zonder automatisch togglen
+      var bsCollapse = bootstrap.Collapse.getInstance(navCollapse);
+      if (!bsCollapse) {
+        bsCollapse = new bootstrap.Collapse(navCollapse, { toggle: false });
+        // start gesloten
+        bsCollapse.hide();
+      }
+
+      // Sluit menu bij klikken op nav-link (alleen als het menu zichtbaar is)
+      var navLinks = navCollapse.querySelectorAll('.nav-link');
+      navLinks.forEach(function (link) {
+        link.addEventListener('click', function (evt) {
+          // Als collapse geopend is, sluit 'm
+          var expanded = document.querySelector('.navbar-toggler')?.getAttribute('aria-expanded');
+          if (navCollapse.classList.contains('show')) {
+            bsCollapse.hide();
+            // Update aria-expanded op de toggler voor assistive tech
+            var toggler = document.querySelector('.navbar-toggler');
+            if (toggler) toggler.setAttribute('aria-expanded', 'false');
+          }
+        });
+      });
+
+      // Wanneer toggler wordt gebruikt, sync aria-expanded
+      var togglerBtn = document.querySelector('.navbar-toggler');
+      if (togglerBtn) {
+        togglerBtn.addEventListener('click', function () {
+          // `aria-expanded` wordt door bootstrap gezet, maar we helpen eventuele timing issues op te lossen
+          setTimeout(function () {
+            var isOpen = navCollapse.classList.contains('show');
+            togglerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            if (isOpen) {
+              // focus op eerste link voor keyboard users
+              var first = navCollapse.querySelector('.nav-link');
+              if (first) first.focus();
+            } else {
+              togglerBtn.focus();
+            }
+          }, 10);
+        });
+      }
+
+      // Optioneel: sluit menu bij klikken buiten (mobiel)
+      document.addEventListener('click', function (e) {
+        if (!navCollapse.classList.contains('show')) return;
+        var inside = navCollapse.contains(e.target) || (togglerBtn && togglerBtn.contains(e.target));
+        if (!inside) {
+          bsCollapse.hide();
+          if (togglerBtn) togglerBtn.setAttribute('aria-expanded', 'false');
+        }
+      }, true);
+    }());
+  </script>
+</body>
+</html>

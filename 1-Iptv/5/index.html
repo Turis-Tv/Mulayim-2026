@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Universele media player — YouTube / Dailymotion / MP4 / HLS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#4f46e5}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial}
+    body{background:linear-gradient(180deg,#071022 0%, #07112a 100%);color:#e6eef8}
+    .wrap{max-width:1200px;margin:24px auto;padding:16px}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .logo{font-weight:700;font-size:18px;color:var(--accent)}
+    .layout{display:grid;grid-template-columns:320px 1fr;gap:18px}
+    .sidebar{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,.6);overflow:auto;max-height:78vh}
+    .playlist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+    .item{display:flex;gap:10px;align-items:center;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.04);cursor:pointer}
+    .item:hover{transform:translateY(-2px)}
+    .item.active{border-color:var(--accent);background:linear-gradient(90deg, rgba(79,70,229,.05), transparent)}
+    .thumb{width:84px;height:56px;object-fit:cover;border-radius:6px}
+    .meta{display:flex;flex-direction:column}
+    .title{font-weight:600}
+    .small{font-size:13px;color:var(--muted)}
+    .player-card{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,.6)}
+    .controls{display:flex;gap:8px;align-items:center}
+    .input-row{display:flex;gap:8px;margin-bottom:10px}
+    input[type=text]{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.05);background:transparent;color:inherit}
+    button{padding:8px;border-radius:8px;border:0;background:var(--accent);color:white;cursor:pointer}
+    @media (max-width:880px){.layout{grid-template-columns:1fr}.sidebar{order:2;max-height:none}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="logo">Universele media player</div>
+      <div class="small">Speel YouTube (ID), Dailymotion, MP4 en HLS af in één interface</div>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div style="font-weight:700;margin-bottom:8px">Playlist</div>
+        <ul class="playlist" id="playlist"></ul>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,.03)">
+        <div style="font-weight:700;margin-bottom:6px">Snel laden</div>
+        <div class="small">Voer een ID of URL in (YouTube ID of Dailymotion ID of volledige video-URL)</div>
+        <div class="input-row">
+          <input id="quick-input" placeholder="YouTube ID bijvoorbeeld: dQw4w9WgXcQ" />
+          <button id="quick-load">Laad</button>
+        </div>
+      </aside>
+
+      <main>
+        <div class="player-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div>
+              <div id="now-title" style="font-weight:700">Geen geselecteerde media</div>
+              <div class="small" id="now-desc">Kies een item uit de playlist of gebruik snel laden</div>
+            </div>
+            <div class="controls">
+              <div class="small">Tijd: <span id="time">00:00</span></div>
+              <button id="pip">PiP</button>
+              <button id="fullscreen">Volledig scherm</button>
+            </div>
+          </div>
+
+          <!-- Container: we wisselen tussen <video> en iframe embeds -->
+          <div id="player-container" style="width:100%;background:black;position:relative;border-radius:8px;overflow:hidden">
+            <!-- default empty -->
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.5/dist/hls.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
+
+  <script>
+    // --- voorbeeld playlist met verschillende providers ---
+    const playlist = [
+      { id: 'yt1', provider: 'youtube', title: 'YouTube voorbeeld (Rickroll)', desc: 'YouTube via ID', src: 'JjTeViaVdoI', thumb: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg' },
+      { id: 'dm1', provider: 'dailymotion', title: 'Dailymotion demo', desc: 'Dailymotion via ID', src: 'x7vo5k1', thumb: 'https://www.dailymotion.com/thumbnail/video/x9087ww' },
+      { id: 'hls1', provider: 'hls', title: 'HLS stream (Sintel)', desc: 'Adaptive HLS', src: 'https://tv-trt1.medya.trt.com.tr/master.m3u8', thumb: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Sintel_poster.jpg/320px-Sintel_poster.jpg' },
+      { id: 'mp41', provider: 'mp4', title: 'MP4 voorbeeld', desc: 'Progressive MP4', src: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4', thumb: 'https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217' }
+    ];
+
+    const playlistEl = document.getElementById('playlist');
+    const nowTitle = document.getElementById('now-title');
+    const nowDesc = document.getElementById('now-desc');
+    const timeEl = document.getElementById('time');
+    const container = document.getElementById('player-container');
+    const quickInput = document.getElementById('quick-input');
+
+    let current = null;
+    let plyrPlayer = null; // Plyr instance when using unified UI
+    let html5Video = null; // reference to <video> element
+
+    function buildPlaylist(){
+      playlist.forEach((item, idx)=>{
+        const li = document.createElement('li');
+        li.className = 'item';
+        li.innerHTML = '\n          <img class="thumb" src="'+item.thumb+'" alt="'+item.title+'" />\n          <div class="meta">\n            <div class="title">'+item.title+'</div>\n            <div class="small">'+item.desc+'</div>\n          </div>';
+        li.addEventListener('click', ()=>loadItem(idx));
+        playlistEl.appendChild(li);
+      });
+    }
+
+    function clearContainer(){
+      // destroy plyr if exists
+      try{ if(plyrPlayer) { plyrPlayer.destroy(); plyrPlayer = null; } }catch(e){}
+      container.innerHTML = '';
+      html5Video = null;
+      window._hls && window._hls.destroy(); window._hls = null;
+    }
+
+    function setActive(idx){
+      Array.from(playlistEl.children).forEach((el,i)=> el.classList.toggle('active', i===idx));
+    }
+
+    function loadItem(idx){
+      const item = playlist[idx];
+      if(!item) return;
+      current = item;
+      nowTitle.textContent = item.title;
+      nowDesc.textContent = item.desc || '';
+      setActive(idx);
+      clearContainer();
+
+      if(item.provider === 'youtube'){
+        // Plyr supports youtube via iframe provider attributes
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('allowfullscreen','');
+        iframe.setAttribute('allow','autoplay; encrypted-media');
+        iframe.src = 'https://www.youtube.com/embed/'+item.src+'?origin='+location.origin+'&rel=0&showinfo=0&enablejsapi=1';
+        iframe.id = 'plyr-yt';
+        container.appendChild(iframe);
+        plyrPlayer = new Plyr(iframe, {controls:['play','progress','current-time','mute','volume','captions','settings','fullscreen']});
+      } else if(item.provider === 'dailymotion'){
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('allowfullscreen','');
+        iframe.setAttribute('allow','autoplay; encrypted-media');
+        iframe.src = 'https://www.dailymotion.com/embed/video/'+item.src;
+        iframe.id = 'plyr-dm';
+        container.appendChild(iframe);
+        plyrPlayer = new Plyr(iframe, {controls:['play','progress','current-time','mute','volume','fullscreen']});
+      } else if(item.provider === 'hls' || item.provider === 'mp4'){
+        // create HTML5 video element for mp4/HLS
+        const video = document.createElement('video');
+        video.setAttribute('playsinline','');
+        video.setAttribute('controls','');
+        video.style.width = '100%';
+        video.style.height = '560px';
+        container.appendChild(video);
+        html5Video = video;
+
+        if(item.provider === 'hls'){
+          if(video.canPlayType('application/vnd.apple.mpegurl')){
+            video.src = item.src;
+          } else if(Hls.isSupported()){
+            const hls = new Hls(); window._hls = hls;
+            hls.loadSource(item.src);
+            hls.attachMedia(video);
+          } else {
+            alert('HLS niet ondersteund in deze browser.');
+            return;
+          }
+        } else {
+          video.src = item.src;
+        }
+
+        plyrPlayer = new Plyr(video, {controls:['play','progress','current-time','mute','volume','captions','settings','fullscreen']});
+
+        // update time display
+        video.addEventListener('timeupdate', ()=>{
+          const s = Math.floor(video.currentTime % 60).toString().padStart(2,'0');
+          const m = Math.floor(video.currentTime / 60).toString().padStart(2,'0');
+          timeEl.textContent = m+':'+s;
+        });
+      }
+    }
+
+    // Quick-load handler: detect provider by pattern
+    function detectAndLoad(input){
+      const v = input.trim();
+      if(!v) return;
+      // YouTube ID (11 chars) or full URL
+      const ytMatch = v.match(/(?:v=|\/)([\w-]{11})/);
+      if(ytMatch){ loadCustom({provider:'youtube', src: ytMatch[1], title: 'YouTube: '+ytMatch[1]}); return; }
+      if(v.length === 11 && /^[\w-]{11}$/.test(v)){ loadCustom({provider:'youtube', src: v, title: 'YouTube: '+v}); return; }
+
+      // Dailymotion id (e.g. x7vo5k1) or URL
+      const dmMatch = v.match(/dailymotion.com\/video\/(x[\w]+)/) || v.match(/dailymotion.com\/embed\/video\/(x[\w]+)/) || v.match(/^(x[\w]+)/);
+      if(dmMatch){ loadCustom({provider:'dailymotion', src: dmMatch[1], title: 'Dailymotion: '+dmMatch[1]}); return; }
+
+      // HLS URL (.m3u8)
+      if(v.includes('.m3u8')){ loadCustom({provider:'hls', src: v, title: 'HLS: '+v}); return; }
+
+      // MP4 URL
+      if(v.endsWith('.mp4') || v.startsWith('http')){ loadCustom({provider:'mp4', src: v, title: 'MP4: '+v}); return; }
+
+      alert('Kon het type niet herkennen. Geef een YouTube ID/URL, Dailymotion ID/URL, een .m3u8 of een .mp4 URL.');
+    }
+
+    function loadCustom(item){
+      // append temporary to playlist and load
+      playlist.unshift(item);
+      // rebuild playlist UI
+      playlistEl.innerHTML = '';
+      buildPlaylist();
+      loadItem(0);
+    }
+
+    document.getElementById('quick-load').addEventListener('click', ()=>{
+      detectAndLoad(quickInput.value);
+    });
+
+    document.getElementById('pip').addEventListener('click', async ()=>{
+      try{
+        if(document.pictureInPictureElement){ await document.exitPictureInPicture(); }
+        else if(html5Video && html5Video.requestPictureInPicture){ await html5Video.requestPictureInPicture(); }
+        else alert('PiP werkt alleen voor HTML5 video-elementen in sommige browsers.');
+      }catch(e){console.error(e)}
+    });
+
+    document.getElementById('fullscreen').addEventListener('click', ()=>{
+      if(document.fullscreenElement) document.exitFullscreen(); else container.requestFullscreen();
+    });
+
+    // init
+    buildPlaylist();
+    if(playlist.length) loadItem(0);
+
+    // Optional: expose load by YouTube ID function for convenience
+    window.loadYouTubeById = function(id){ loadCustom({provider:'youtube', src: id, title: 'YouTube: '+id}); }
+  </script>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Foto achtergrond verwijderen & downloaden (client-side)</title>
+<style>
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin: 20px; color:#111; }
+  h1 { font-size: 20px; margin-bottom: 8px; }
+  .layout { display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start; }
+  .panel { border:1px solid #ddd; padding:12px; border-radius:8px; background:#fafafa; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+  #canvasWrap { width:560px; max-width:100%; text-align:center; }
+  canvas { max-width:100%; border:1px solid #ccc; cursor:crosshair; display:block; margin:0 auto; }
+  .controls { width:320px; min-width:240px; }
+  label { display:block; margin-top:10px; font-size:13px; }
+  input[type="range"] { width:100%; }
+  button { margin-top:12px; padding:8px 12px; border-radius:6px; border:1px solid #888; background:#fff; cursor:pointer; }
+  .small { font-size:12px; color:#555; margin-top:6px; }
+  .row { display:flex; gap:8px; align-items:center; margin-top:8px; }
+  .color-swatch { width:28px; height:28px; border:1px solid #ccc; border-radius:4px; }
+  .hint { font-size:12px; color:#666; margin-top:6px; }
+  .btn-primary { background:#0b76ef; color:#fff; border-color:transparent; }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .footer { margin-top:16px; font-size:12px; color:#666; }
+  input[type=file] { padding:6px 0; }
+</style>
+</head>
+<body>
+  <h1>Turis Tv </h1>
+  <div class="layout">
+    <div class="panel" id="canvasWrap">
+      <div class="small">Arka plan rengini seçmek için fotoğrafa tıklayın (veya "Örnek köşe"yi kullanın)").</div>
+      <canvas id="photoCanvas" width="800" height="600"></canvas>
+      <div class="hint">İpucu: Daha hassas tıklama yapmak istiyorsanız tarayıcınızdaki görüntüyü büyütün/teleskoplayın.</div>
+    </div>
+
+    <div class="panel controls">
+      <label>1) Fotoğraf yükle
+        <input id="fileInput" type="file" accept="image/*">
+      </label>
+
+      <label>2)Renk seç
+        <div class="row">
+          <div id="colorSwatch" class="color-swatch"></div>
+          <div>
+            <button id="sampleCornerBtn">Örnek köşe (otomatik)</button>
+            <button id="clearColorBtn">Açık renk</button>
+          </div>
+        </div>
+        <div class="small">Renk seçmediğiniz takdirde köşe örneği kullanılacaktır.</div>
+      </label>
+
+      <label>Tolerans (ne kadar renk farkının giderildiği)
+        <input id="tolerance" type="range" min="0" max="255" value="30">
+        <div class="small"><span id="tolVal">30</span>(daha yüksek = daha fazla alan şeffaf hale gelir)</div>
+      </label>
+
+      <label>Tüy / yumuşak kenar (piksel)
+        <input id="feather" type="range" min="0" max="60" value="8">
+        <div class="small"><span id="featherVal">8</span>px yumuşak geçiş</div>
+      </label>
+
+      <label>Genel fotoğraf opaklığı (tüm fotoğrafı yarı saydam yap)
+        <input id="globalOpacity" type="range" min="0" max="100" value="100">
+        <div class="small"><span id="opacityVal">100</span>%</div>
+      </label>
+
+      <div class="actions">
+        <button id="applyBtn" class="btn-primary">Arka Planı İşle / Kaldır</button>
+        <button id="resetBtn">Sıfırla (orijinal fotoğraf)</button>
+        <button id="downloadBtn">PNG'yi indirin (şeffaflıkla)</button>
+      </div>
+
+      <div class="footer">
+      
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const fileInput = document.getElementById('fileInput');
+  const canvas = document.getElementById('photoCanvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const colorSwatch = document.getElementById('colorSwatch');
+  const sampleCornerBtn = document.getElementById('sampleCornerBtn');
+  const clearColorBtn = document.getElementById('clearColorBtn');
+  const tolerance = document.getElementById('tolerance');
+  const feather = document.getElementById('feather');
+  const tolVal = document.getElementById('tolVal');
+  const featherVal = document.getElementById('featherVal');
+  const globalOpacity = document.getElementById('globalOpacity');
+  const opacityVal = document.getElementById('opacityVal');
+  const applyBtn = document.getElementById('applyBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+
+  let originalImage = null; // Image object
+  let originalImageData = null; // ImageData for reset
+  let chosenColor = null; // {r,g,b}
+  let lastProcessedImageData = null;
+
+  function setSwatch(col) {
+    if (!col) {
+      colorSwatch.style.background = 'transparent';
+      colorSwatch.style.border = '1px dashed #bbb';
+    } else {
+      colorSwatch.style.background = `rgb(${col.r}, ${col.g}, ${col.b})`;
+      colorSwatch.style.border = '1px solid #888';
+    }
+  }
+
+  function loadImageFile(file) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        originalImage = img;
+        // Resize canvas to image but limit to reasonable display width
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(img, 0, 0);
+        // store original pixels for reset
+        originalImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+        lastProcessedImageData = null;
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+      loadImageFile(e.target.files[0]);
+    }
+  });
+
+  // clicking on canvas samples color
+  canvas.addEventListener('click', (ev) => {
+    if (!canvas.width || !canvas.height) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((ev.clientX - rect.left) * (canvas.width / rect.width));
+    const y = Math.floor((ev.clientY - rect.top) * (canvas.height / rect.height));
+    const p = ctx.getImageData(x, y, 1,1).data;
+    chosenColor = { r: p[0], g: p[1], b: p[2] };
+    setSwatch(chosenColor);
+  });
+
+  sampleCornerBtn.addEventListener('click', () => {
+    if (!canvas.width || !canvas.height) return;
+    // sample top-left corner area average (20x20 or smaller)
+    const w = Math.min(20, canvas.width);
+    const h = Math.min(20, canvas.height);
+    const data = ctx.getImageData(0,0,w,h).data;
+    let r=0,g=0,b=0, n=0;
+    for (let i=0;i<data.length;i+=4){
+      r += data[i]; g += data[i+1]; b += data[i+2]; n++;
+    }
+    chosenColor = { r: Math.round(r/n), g: Math.round(g/n), b: Math.round(b/n) };
+    setSwatch(chosenColor);
+  });
+
+  clearColorBtn.addEventListener('click', () => {
+    chosenColor = null;
+    setSwatch(null);
+  });
+
+  tolerance.addEventListener('input', () => tolVal.textContent = tolerance.value);
+  feather.addEventListener('input', () => featherVal.textContent = feather.value);
+  globalOpacity.addEventListener('input', () => opacityVal.textContent = globalOpacity.value);
+
+  // processing: remove background by color distance with feather
+  function processImage() {
+    if (!originalImageData) return;
+    // copy original pixels to new ImageData
+    const imgData = ctx.createImageData(originalImageData.width, originalImageData.height);
+    imgData.data.set(originalImageData.data);
+    const data = imgData.data;
+    const w = imgData.width, h = imgData.height;
+    // pick sample color: if no chosenColor, sample top-left like auto
+    let sample = chosenColor;
+    if (!sample) {
+      // average top-left 10x10
+      const ww = Math.min(10, w), hh = Math.min(10, h);
+      let r=0,g=0,b=0,n=0;
+      const corner = ctx.getImageData(0,0,ww,hh).data;
+      for (let i=0;i<corner.length;i+=4){ r+=corner[i]; g+=corner[i+1]; b+=corner[i+2]; n++; }
+      sample = { r: Math.round(r/n), g: Math.round(g/n), b: Math.round(b/n) };
+      setSwatch(sample);
+    }
+
+    const tol = Number(tolerance.value); // 0..255
+    const featherPx = Number(feather.value); // 0..60
+    const globalOp = Number(globalOpacity.value) / 100;
+
+    // Precompute squared tolerance for speed (euclidean)
+    const tolSq = tol * tol;
+    const featherSq = featherPx * featherPx;
+
+    // Process each pixel
+    for (let y=0; y<h; y++){
+      for (let x=0; x<w; x++){
+        const idx = (y*w + x)*4;
+        const r = data[idx], g = data[idx+1], b = data[idx+2];
+        const dr = r - sample.r;
+        const dg = g - sample.g;
+        const db = b - sample.b;
+        const distSq = dr*dr + dg*dg + db*db;
+        if (distSq <= tolSq) {
+          // fully transparent region
+          data[idx+3] = Math.round(data[idx+3] * 0.0 * globalOp);
+        } else if (featherPx > 0 && distSq <= (tol + featherPx)*(tol + featherPx)) {
+          // between tol and tol+feather: smooth alpha
+          const dist = Math.sqrt(distSq);
+          const t = (dist - tol) / featherPx; // 0..1
+          // alpha = originalAlpha * t * globalOp
+          data[idx+3] = Math.round(data[idx+3] * Math.min(1, Math.max(0, t)) * globalOp);
+        } else {
+          // keep pixel but apply global opacity
+          data[idx+3] = Math.round(data[idx+3] * globalOp);
+        }
+      }
+    }
+
+    // put result onto canvas
+    ctx.putImageData(imgData, 0, 0);
+    lastProcessedImageData = imgData;
+  }
+
+  applyBtn.addEventListener('click', () => {
+    if (!originalImageData) { alert('Laad eerst een foto.'); return; }
+    processImage();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if (!originalImageData) return;
+    // restore original pixels and reset lastProcessedImageData
+    ctx.putImageData(originalImageData, 0, 0);
+    lastProcessedImageData = null;
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    // if no image loaded:
+    if (!originalImageData) { alert('Laad eerst een foto.'); return; }
+    // Ensure processed state is on canvas (if not, process with current settings)
+    if (!lastProcessedImageData) processImage();
+    // Convert canvas to PNG (keeps alpha channel)
+    canvas.toBlob((blob) => {
+      if (!blob) { alert('Fout bij genereren PNG.'); return; }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'bewerkt_transparant.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  });
+
+  // initialize empty swatch
+  setSwatch(null);
+
+  // helpful: make canvas show placeholder text if no image
+  function drawPlaceholder() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#666';
+    ctx.font = '16px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Laad een foto via de knop links', canvas.width/2, canvas.height/2);
+  }
+  // set default canvas size & placeholder
+  canvas.width = 800; canvas.height = 500;
+  drawPlaceholder();
+
+})();
+</script>
+</body>
+</html>

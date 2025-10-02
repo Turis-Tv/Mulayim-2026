@@ -1,0 +1,184 @@
+  <!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Film pagina — YouTube speler met categorie keuze</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#06b6d4}
+    html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;color:#e6eef6;background:linear-gradient(180deg,#071023 0%, #071835 100%)}
+    .container{max-width:1100px;margin:28px auto;padding:20px}
+    header{display:flex;gap:16px;align-items:center;justify-content:space-between}
+    h1{font-size:20px;margin:0}
+    .controls{display:flex;gap:10px;align-items:center}
+    .search{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+    .categories{display:flex;gap:8px;flex-wrap:wrap}
+    .cat-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:6px 10px;border-radius:999px;cursor:pointer;color:var(--muted)}
+    .cat-btn.active{background:linear-gradient(90deg,rgba(6,182,212,0.12),rgba(59,130,246,0.06));color:var(--accent);border-color:rgba(6,182,212,0.25)}
+    .layout{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:18px}
+    @media (max-width:900px){.layout{grid-template-columns:1fr}.player-col{order:-1}}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+    .thumb{position:relative;border-radius:6px;overflow:hidden}
+    .thumb img{display:block;width:100%;height:140px;object-fit:cover}
+    .meta{padding:8px 6px}
+    .title{font-size:14px;margin:0 0 6px}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;background:rgba(255,255,255,0.03);color:var(--muted)}
+    .player{background:var(--card);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    iframe{width:100%;height:210px;border-radius:8px;border:0;background:#000}
+    .playlist{margin-top:12px;overflow:auto;max-height:420px}
+    .playlist .item{display:flex;gap:8px;align-items:center;padding:8px;border-radius:8px}
+    .playlist .item img{width:84px;height:48px;object-fit:cover;border-radius:6px}
+    .playlist .item .t{font-size:13px}
+    .small{font-size:13px;color:var(--muted)}
+    footer{margin-top:20px;color:var(--muted);font-size:13px}
+    .row{display:flex;gap:8px;align-items:center}
+    .toggle{display:inline-flex;align-items:center;gap:6px}
+    input[type=checkbox]{width:18px;height:18px}
+  </style>
+</head>
+<body>
+
+ 
+
+  <div class="container">
+    <header>
+      <div>
+ 
+    
+      <div class="controls">
+        <input id="search" class="search" placeholder="Arama ..." />
+        <div class="toggle">
+          <label class="small">Autoplay</label>
+          <input id="autoplay" type="checkbox" checked />
+        </div>
+      </div>
+    </header>
+
+    <div style="margin-top:12px" class="categories" id="categories"></div>
+
+    <div class="layout">
+      <main>
+        <div class="grid" id="grid"></div>
+      </main>
+
+      <aside class="player-col">
+        <div class="player">
+          <div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
+    
+            <span id="now-cat" class="small"></span>
+          </div>
+          <div style="margin-top:10px">
+            <iframe id="ytplayer" src="about:blank" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+
+          <div class="playlist" id="playlist"></div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+ 
+    </footer>
+  </div>
+
+
+
+
+
+  <script>
+    // Voorbeeld dataset — vervang of breid uit
+    const videos = [
+      {id:'346i0496yVM', title:'194 Bölüm Sezon Finali', category:'Kuruluş Osman'},
+      {id:'osvlWZGJ-sc', title:'193 Bölüm', category:'Kuruluş Osman'},
+      {id:'c1h68yMxb3I', title:'Populaire clip', category:'Muzik'},
+      {id:'3JZ_D3ELwOQ', title:'Avonturen montage', category:'Actie'},
+      {id:'2Vv-BfVoq4g', title:'Ontspannende scène', category:'Drama'},
+      {id:'kXYiU_JCYtU', title:'Live optreden', category:'Muzik'},
+      {id:'e-ORhEE9VVg', title:'Kort film', category:'Drama'},
+      {id:'9bZkp7q19f0', title:'Klassieke videoclip', category:'Muzik'},
+      {id:'o1tj2zJ2Wvg', title:'Natuur documentaire', category:'Kuruluş Osman'}
+    ];
+
+    const grid = document.getElementById('grid');
+    const categoriesEl = document.getElementById('categories');
+    const playlistEl = document.getElementById('playlist');
+    const nowTitle = document.getElementById('now-title');
+    const nowCat = document.getElementById('now-cat');
+    const player = document.getElementById('ytplayer');
+    const searchInput = document.getElementById('search');
+    const autoplayChk = document.getElementById('autoplay');
+
+    let state = {category: 'Hepsi', query: ''};
+
+    function uniqueCategories(){
+      const set = new Set(videos.map(v=>v.category));
+      return ['Hepsi', ...set];
+    }
+
+    function renderCategories(){
+      categoriesEl.innerHTML = '';
+      uniqueCategories().forEach(cat=>{
+        const btn = document.createElement('button');
+        btn.className = 'cat-btn' + (cat === state.category ? ' active' : '');
+        btn.textContent = cat;
+        btn.onclick = ()=>{ state.category = cat; renderCategories(); renderGrid(); }
+        categoriesEl.appendChild(btn);
+      })
+    }
+
+    function renderGrid(){
+      const q = state.query.trim().toLowerCase();
+      grid.innerHTML = '';
+      videos.filter(v=> (state.category==='Hepsi' || v.category===state.category) && (v.title.toLowerCase().includes(q) || v.category.toLowerCase().includes(q)) )
+            .forEach(v=>{
+              const card = document.createElement('div'); card.className='card';
+              card.innerHTML = `
+                <div class="thumb">
+                  <img loading="lazy" src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg" alt="${v.title}" />
+                </div>
+                <div class="meta">
+                  <h3 class="title">${v.title}</h3>
+                  <div class="row"><span class="badge">${v.category}</span></div>
+                </div>
+              `;
+              card.onclick = ()=> playVideo(v);
+              grid.appendChild(card);
+            });
+      renderPlaylist();
+    }
+
+    function renderPlaylist(){
+      playlistEl.innerHTML = '';
+      const list = videos.filter(v=> state.category==='Alle' || v.category===state.category);
+      list.forEach(v=>{
+        const it = document.createElement('div'); it.className='item';
+        it.innerHTML = `<img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${v.title}" /><div><div class='t'>${v.title}</div><div class='small'>${v.category}</div></div>`;
+        it.onclick = ()=> playVideo(v);
+        playlistEl.appendChild(it);
+      });
+    }
+
+    function playVideo(v){
+      const autoplay = autoplayChk.checked ? 1 : 0;
+      player.src = `https://www.youtube.com/embed/${v.id}?rel=0&autoplay=${autoplay}`;
+      nowTitle.textContent = v.title;
+      nowCat.textContent = v.category;
+
+      // Visueel highlight (optioneel)
+      document.querySelectorAll('.card').forEach(el=>el.style.boxShadow='none');
+    }
+
+    // Events
+    searchInput.addEventListener('input', (e)=>{ state.query = e.target.value; renderGrid(); });
+    autoplayChk.addEventListener('change', ()=>{ /* geen extra actie */ });
+
+    // Initialiseer
+    renderCategories();
+    renderGrid();
+
+    // Optioneel: speel de eerste video automatisch bij laden
+    // playVideo(videos[0]);
+  </script>
+</body>
+</html>

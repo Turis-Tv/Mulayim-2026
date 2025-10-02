@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPTV Menu + Player</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      padding: 20px;
+      color: #0f9dff;
+      margin: 0;
+    }
+
+    /* Header met hamburger */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: #222;
+    }
+
+    .hamburger {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.8rem;
+      cursor: pointer;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    video {
+      width: 100%;
+      height: 60vh;
+      background: #000;
+      border-radius: 12px;
+    }
+
+    /* Menu lijst */
+    .menu {
+      display: none;
+      background: #222;
+      margin: 0;
+      padding: 10px 20px;
+      list-style: none;
+    }
+
+    .menu.active {
+      display: block;
+    }
+
+    .menu li {
+      padding: 10px;
+      border-bottom: 1px solid #333;
+      cursor: pointer;
+    }
+
+    .menu li:hover {
+      background: #0f9dff;
+      color: #fff;
+    }
+
+    .menu img {
+      width: 40px;
+      height: 30px;
+      object-fit: cover;
+      margin-right: 10px;
+      vertical-align: middle;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <h1>IPTV</h1>
+    <button class="hamburger" onclick="toggleMenu()">☰</button>
+  </div>
+
+  <!-- Hamburger menu -->
+  <ul class="menu" id="menu">
+    <li data-stream="https://tv-trt1.medya.trt.com.tr/master.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=TRT+1" alt="TRT 1"> TRT 1
+    </li>
+    <li data-stream="https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=ATV" alt="ATV"> ATV
+    </li>
+    <li data-stream="https://ackaxsqacw.turknet.ercdn.net/ozfkfbbjba/kanald/kanald.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D" alt="Kanal D"> Kanal D
+    </li>
+    <li data-stream="https://emmazbvkkf.turknet.ercdn.net/cnifuowzza/startv/startv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Star+TV" alt="Star TV"> Star TV
+    </li>
+    <li data-stream="https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/showtv/showtv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Show+TV" alt="Show TV"> Show TV
+    </li>
+  </ul>
+
+  <!-- Video player -->
+  <div class="container">
+    <video id="player" controls autoplay></video>
+  </div>
+
+  <!-- HLS.js -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script>
+    const video = document.getElementById('player');
+    const menu = document.getElementById('menu');
+    const items = document.querySelectorAll('.menu li');
+
+    function playStream(url) {
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+      }
+    }
+
+    // eerste stream automatisch laden
+    playStream(items[0].dataset.stream);
+
+    items.forEach(item => {
+      item.addEventListener('click', () => {
+        playStream(item.dataset.stream);
+        toggleMenu(); // menu sluiten na selectie
+      });
+    });
+
+    function toggleMenu() {
+      menu.classList.toggle('active');
+    }
+  </script>
+</body>
+</html>

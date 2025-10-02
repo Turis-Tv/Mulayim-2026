@@ -1,0 +1,490 @@
+ <!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPTV Menu + Player</title>
+  <style>
+
+
+.menu a {
+  color: inherit;       /* neemt de witte kleur van het menu over */
+  text-decoration: none; /* geen onderstreping */
+  display: block;        /* link vult de hele li */
+  width: 100%;
+  height: 100%;
+}
+
+
+
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      padding: 10px;
+      color: #0f9dff;
+      margin: 0;
+    }
+
+    /* Header met 2 hamburgers */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: #222;
+    }
+
+    .hamburger {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.0rem;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .hamburger:focus {
+      outline: none;
+    }
+
+    /* Slide-in menu stijl */
+    .menu {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 70%;
+      max-width: 300px;
+      background: #222;
+      padding: 20px;
+      list-style: none;
+      margin: 0;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .menu.right {
+      right: 0;
+      left: auto;
+      transform: translateX(100%);
+    }
+
+    .menu.active {
+      transform: translateX(0);
+    }
+
+    .menu li {
+      padding: 10px;
+      border-bottom: 1px solid #333;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    .menu li:hover {
+      background: #0f9dff;
+      color: #fff;
+    }
+
+    .menu img {
+      width: 40px;
+      height: 30px;
+      object-fit: cover;
+      margin-right: 10px;
+      vertical-align: middle;
+      border-radius: 4px;
+    }
+
+    /* Overlay voor mobiel */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 999;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    video {
+      width: 100%;
+      height: 60vh;
+      background: #000;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+
+    <div>
+      <button class="hamburger" onclick="toggleMenu('menu1')">☰ Kanallar</button>     
+      <button class="hamburger" onclick="toggleMenu('menu2')">☰ Kategoriler</button>
+    </div>
+  </div>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay" onclick="closeMenus()"></div>
+
+  <!-- Zenders menu (links) -->
+  <ul class="menu" id="menu1">
+    <li data-stream="https://tv-trt1.medya.trt.com.tr/master.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=TRT+1"> TRT 1
+    </li>
+    <li data-stream="https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=ATV"> ATV
+    </li>
+    <li data-stream="https://ackaxsqacw.turknet.ercdn.net/ozfkfbbjba/kanald/kanald.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> KANAL D 
+    </li>
+
+    <li data-stream="https://emmazbvkkf.turknet.ercdn.net/cnifuowzza/startv/startv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> STAR TV 
+    </li>
+    <li data-stream="https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/showtv/showtv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> SHOW TV
+    </li>
+    <li data-stream="https://uycyyuuzyh.turknet.ercdn.net/nphindgytw/nowtv/nowtv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> NOW 
+    </li>
+    <li data-stream="https://rkhubpaomb.turknet.ercdn.net/fwjkgpasof/tv8/tv8.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TV 8  
+    </li>
+    <li data-stream="https://rkhubpaomb.turknet.ercdn.net/fwjkgpasof/tv8bucuk/tv8bucuk.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TV 8,5 
+    </li>
+    <li data-stream="https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> A2 
+    </li>
+    <li data-stream="https://ceokzokgtd.erbvr.com/tabiitv/tabiitv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TABII TV 
+    </li>
+    <li data-stream="https://ackaxsqacw.turknet.ercdn.net/ozfkfbbjba/teve2/teve2.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TEVE 2
+    </li>
+    <li data-stream="https://yurhnwtpys.turknet.ercdn.net/cvmbjbpmdx/kanal7/kanal7.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> KANAL 7 
+    </li>
+    <li data-stream="https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/showmax/showmax.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> SHOWMAX
+    </li>
+    <li data-stream="https://beyaztv-live.daioncdn.net/beyaztv/beyaztv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BEYAZ TV 
+    </li>
+    <li data-stream="https://turkmedya-live.ercdn.net/tv360/tv360.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TV 360
+    </li>
+    <li data-stream="https://tv-trtturk.medya.trt.com.tr/master.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TRT TÛRK 
+    </li>
+    <li data-stream="https://tv-trtavaz.medya.trt.com.tr/master.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TRT AVAZ
+    </li>
+    <li data-stream="https://emmazbvkkf.turknet.ercdn.net/cnifuowzza/tlc/tlc.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TLC
+    </li>
+    <li data-stream="https://emmazbvkkf.turknet.ercdn.net/cnifuowzza/dmax/dmax.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> DMAX
+    </li>
+    <li data-stream="https://tv-trtbelgesel.medya.trt.com.tr/master.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TRT BELGESEL 
+    </li>
+    <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/tarihtv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TARIH TV
+    </li>
+    <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/bbc.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BBC 
+    </li>
+    <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/viasathistory.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> VIASATHISTORY
+    </li>
+    <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/viasatexplore.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> VIASATEXPLORE
+    </li>
+    <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/history.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> HISTORY 
+    </li>
+    <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/discovery.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> DISCOVERY
+    </li>
+    <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/natgeo.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> NATGEO
+    </li>
+    <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/natgeowild.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> NATGEOWILD 
+    </li>
+    <li data-stream="https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago_cocuk/minikago_cocuk.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> MINIKA COCUK 
+    </li>
+    <li data-stream="https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> MINIKA GO 
+    </li>
+    <li data-stream="https://tv.arectv34.sbs/live/cartoonnetwork.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> CARTOON NETWORK
+    </li>
+     <li data-stream="https://tv-trtcocuk.medya.trt.com.tr/master.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TRT COCUK
+    </li>
+     <li data-stream="https://izle.canlitvapp.com/sozcu/index.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> SÔZCÛ TV
+    </li>
+     <li data-stream="https://halktv-live.daioncdn.net/halktv/halktv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> HALK TV 
+    </li>
+     <li data-stream="https://tele1-live.ercdn.net/tele1/tele1.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TELE 1
+    </li>
+     <li data-stream="https://flashhaber-live.ercdn.net/flashhaber/flashhaber.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> FLASHABER 
+    </li>
+     <li data-stream="https://dogus-live.daioncdn.net/ntv/ntv_720p.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> NTV
+    </li>
+     <li data-stream="https://bloomberght-live.daioncdn.net/bloomberght/bloomberght.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BLOOMBERGHT
+    </li>
+     <li data-stream="https://ekoltv-live.ercdn.net/ekoltv/ekoltv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> EKOL TV
+    </li>
+     <li data-stream="https://ensonhaber-live.ercdn.net/haberglobal/haberglobal.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> HABER GLOBAL
+    </li>
+     <li data-stream="https://tv-trthaber.medya.trt.com.tr/master.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TRT HABER
+    </li>
+     <li data-stream="https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/haberturktv/haberturktv.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> HABER TÛRK
+    </li>
+     <li data-stream="https://tv100-live.daioncdn.net/tv100/tv100.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TV 100
+    </li>
+     <li data-stream="https://tv.ensonhaber.com/tv24/tv24_1080p.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TV 24
+    </li>
+     <li data-stream="https://turkmedya-live.ercdn.net/tv24/tv24.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TV 24
+    </li>
+     <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/mvturk.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> MOVIE SMART TÛRK
+    </li>
+     <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/sinemaaile2.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> SINEMA AILE 2
+    </li>
+    </li>
+     <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/sinemaaksiyon.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> SINEMA AKSION 
+    </li>
+    </li>
+     <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/sinemaaksiyon2.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> SINEMA AKSION 2
+    </li>
+    </li>
+     <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbslive/sinemakomedi.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> SINEMA KOMEDI
+    </li>
+    </li>
+     <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/bsstars.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BEINMOVIE STARS
+    </li>
+    </li>
+     <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/bsturk.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BEINMOVIE TÛRK 
+    </li>
+    </li>
+     <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/bspremier1.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BEINMOVIE PREMIERE 1 
+    </li>
+    </li>
+     <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/bsfamily.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BEIN MOVIE FAMILY
+    </li>
+    </li>
+     <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/box1.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BOX OFFICE 1
+    </li>
+    </li>
+     <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/box2.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BOX OFFICE 2
+    </li>
+    </li>
+     <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/box3.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BOX OFFICE 3
+    </li>
+    </li>
+     <li data-stream="https://tv-trtmuzik.medya.trt.com.tr/master.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TRT MÛZIK
+    </li>
+    </li>
+     <li data-stream="https://listen.powerapp.com.tr/pturktaptaze/taptaze.smil/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> NR 1 TÛRK
+    </li>
+    </li>
+     <li data-stream="https://livetv.powerapp.com.tr/powerTV/powerhd.smil/playist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> POWER
+    </li>
+   </li>
+     <li data-stream="https://listen.powerapp.com.tr/pturkakustik/akustik.smil/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> POWER TÛRK
+    </li>
+   </li>
+     <li data-stream="https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://live.duhnet.tv/S2/HLS_LIVE/dreamturknp/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> DREAMTÛRK
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/sbeinsports-1/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BEINSPORT 1 
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/sbeinsports-2/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BEINSPORT 2 
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/sbeinsports-3/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BEINSPORT 3
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/sbeinsports-4/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BEINSPORT 4 
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/sbeinsports-5/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BEINSPORT 5
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/sbeinsportsmax-1/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BEINSPORT MAX 1 
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/sbeinsportsmax-2/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> BEINSPORT MAX 2
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/stivibuspor-1/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TIVISPOR 1 
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/stivibuspor-2/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TIVISPOR 2 
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/stivibuspor-3/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TIVISPOR 3
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/stivibuspor-4/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> TIVISPOR 4
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/sssport/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> S SPORT 
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/sssport2/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> S SPORT 2
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/sssplus1/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> S SPOR +1
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/sssplus2/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> S SPOR+2
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/ssmartspor/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> SMART 1 
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/ssmartspor2/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> SMART 2 
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/seurosport1/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> EUROSPORT 1 
+    </li>
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/seurosport2/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> EUROSPORT 2 
+    </li>
+     
+   </li>
+     <li data-stream="https://one.b2a7fa109ef84a6f.click/live/saspor/playlist.m3u8">
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?text=Kanal+D"> ASPOR
+    </li>
+
+  
+
+  </ul>
+<!-- Categorie menu (rechts) -->
+<ul class="menu right" id="menu2">
+  <li><a href="https://example.com/nieuws">📺 Nieuws</a></li>
+  <li><a href="https://example.com/films">🎬 Films</a></li>
+  <li><a href="https://example.com/sport">⚽ Sport</a></li>
+  <li><a href="https://example.com/kids">👨‍👩‍👧 Kids</a></li>
+</ul>
+
+  <!-- Video player -->
+  <div class="container">
+    <video id="player" controls autoplay></video>
+  </div>
+
+  <!-- HLS.js -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script>
+    const video = document.getElementById('player');
+    const items = document.querySelectorAll('#menu1 li');
+    const overlay = document.getElementById('overlay');
+
+    function playStream(url) {
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+      }
+    }
+
+    // Eerste stream laden
+    playStream(items[0].dataset.stream);
+
+    items.forEach(item => {
+      item.addEventListener('click', () => {
+        playStream(item.dataset.stream);
+        closeMenus();
+      });
+    });
+
+    function toggleMenu(id) {
+      closeMenus();
+      document.getElementById(id).classList.add('active');
+      overlay.classList.add('active');
+    }
+
+    function closeMenus() {
+      document.querySelectorAll('.menu').forEach(m => m.classList.remove('active'));
+      overlay.classList.remove('active');
+    }
+  </script>
+</body>
+</html>

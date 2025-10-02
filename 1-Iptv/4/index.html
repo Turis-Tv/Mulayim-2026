@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IPTV Player — M3U Ingebouwd Voorbeeld</title>
+
+  <!-- Tailwind (CDN) -->
+  <script defer src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Video.js CSS -->
+  <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+
+  <style>
+    body { background:#0f1724; color:#e6eef8; }
+    .video-js { width:100% !important; height:100% !important; background:#000; border-radius:.5rem; }
+    .channel-item { cursor:pointer }
+  </style>
+</head>
+<body class="min-h-screen p-6">
+  <div class="max-w-6xl mx-auto grid lg:grid-cols-3 gap-6">
+    <!-- Player -->
+    <div class="lg:col-span-2 bg-gray-800 rounded-lg p-4" id="player-wrapper">
+      <h2 id="current-channel-name" class="text-lg font-semibold text-center text-gray-200 mb-3"></h2>
+      <div class="w-full h-[56vh] bg-black rounded-md overflow-hidden relative">
+        <video id="videoPlayer" class="video-js vjs-default-skin" controls preload="auto" data-setup='{}'></video>
+        <div id="video-loading-indicator" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white text-lg font-semibold hidden">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Channel list -->
+    <div class="bg-gray-800 rounded-lg p-4">
+      <div id="channel-list" class="space-y-2 overflow-y-auto max-h-[70vh]"></div>
+    </div>
+  </div>
+
+  <!-- Video.js -->
+  <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+
+  <script>
+    // Ingebouwde M3U-content (5 demo-kanalen)
+    const M3U_CONTENT = `#EXTM3U
+#EXTINF:-1 tvg-id="" tvg-name="Turis " tvg-logo="https://placehold.co/60x60/2d3748/9ca3af?text=1",Demo Channel 1
+https://tv-trt1.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-id="" tvg-name="Turis 1" tvg-logo="https://placehold.co/60x60/2d3748/9ca3af?text=2",Demo Channel 2
+https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv.m3u8
+#EXTINF:-1 tvg-id="" tvg-name="Turis 2" tvg-logo="https://placehold.co/60x60/14532d/ffffff?text=N",Nature Channel
+https://ackaxsqacw.turknet.ercdn.net/ozfkfbbjba/kanald/kanald.m3u8
+#EXTINF:-1 tvg-id="" tvg-name="Turis 3" tvg-logo="https://placehold.co/60x60/274060/ffffff?text=S",Sports Demo
+https://emmazbvkkf.turknet.ercdn.net/cnifuowzza/startv/startv.m3u8
+#EXTINF:-1 tvg-id="" tvg-name="Turis 4" tvg-logo="https://placehold.co/60x60/444444/ffffff?text=NEWS",News Live
+https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/showtv/showtv.m3u8
+`;
+
+    const channelListDiv = document.getElementById('channel-list');
+    const currentChannelNameDisplay = document.getElementById('current-channel-name');
+    const videoLoadingIndicator = document.getElementById('video-loading-indicator');
+    let player;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      player = videojs(document.getElementById('videoPlayer'));
+      const channels = parseM3UContent(M3U_CONTENT);
+      renderChannels(channels);
+    });
+
+    function parseM3UContent(m3uText) {
+      const lines = m3uText.split(/\r?\n/);
+      const channels = [];
+      let current = null;
+
+      for (let line of lines) {
+        line = line.trim();
+        if (!line) continue;
+
+        if (line.startsWith('#EXTINF:')) {
+          const attrs = {};
+          const attrMatches = line.match(/([a-zA-Z0-9-]+)=\"([^\"]*)\"/g) || [];
+          attrMatches.forEach(a => {
+            const [k, v] = a.split('=');
+            attrs[k] = v.replace(/\"/g, '');
+          });
+          const nameMatch = line.match(/,(.*)$/);
+          const name = attrs['tvg-name'] || (nameMatch ? nameMatch[1].trim() : 'Unknown Channel');
+
+          current = {
+            name,
+            logo: attrs['tvg-logo'] || 'https://placehold.co/40x40/374151/d1d5db?text=TV',
+            url: ''
+          };
+        } else if (!line.startsWith('#') && current) {
+          current.url = line;
+          channels.push(current);
+          current = null;
+        }
+      }
+      return channels;
+    }
+
+    function renderChannels(list) {
+      channelListDiv.innerHTML = '';
+      list.forEach(ch => {
+        const el = document.createElement('div');
+        el.className = 'flex items-center p-2 rounded bg-gray-700 hover:bg-gray-600 channel-item';
+
+        el.innerHTML = `
+          <img src="${ch.logo}" alt="logo" class="w-10 h-10 rounded mr-3 object-cover">
+          <div class="flex-1 text-gray-100 text-sm">${ch.name}</div>
+        `;
+
+        el.addEventListener('click', () => loadVideo(ch.url, ch.name));
+        channelListDiv.appendChild(el);
+      });
+    }
+
+    function loadVideo(url, channelName) {
+      currentChannelNameDisplay.textContent = channelName;
+      videoLoadingIndicator.classList.remove('hidden');
+      document.getElementById('player-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      player.src({ src: url, type: 'application/x-mpegURL' });
+      player.load();
+      player.play().catch(e => console.warn('Autoplay blocked:', e));
+      player.one('playing', () => videoLoadingIndicator.classList.add('hidden'));
+      player.one('error', () => videoLoadingIndicator.classList.add('hidden'));
+    }
+  </script>
+</body>
+</html>

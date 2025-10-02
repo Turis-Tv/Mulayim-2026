@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Turis Tv</title>
+
+  <!-- favicon voorbeelden -->
+  <link rel="icon" href="favicon.ico" sizes="32x32">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <style>
+    :root{
+      --bg:#0a0f1c;
+      --card:#12192e;
+      --accent:#06b6d4;
+      --gap:12px;
+      --card-radius:10px;
+    }
+
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:#fff;-webkit-font-smoothing:antialiased}
+    header{
+      background:var(--card);
+      padding:12px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      position:sticky;top:0;z-index:50;
+    }
+
+    /* logo / icoon links */
+    .brand{
+      display:flex;align-items:center;gap:10px;
+    }
+    .brand img{
+      width:40px;height:40px;border-radius:8px;object-fit:cover;flex:0 0 40px;
+    }
+    .brand h1{font-size:18px;margin:0}
+
+    /* hamburger */
+    .hamburger{
+      background:none;border:none;color:#fff;font-size:26px;cursor:pointer;
+      padding:10px;border-radius:8px;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .hamburger:active{transform:scale(0.98)}
+
+    .container{
+      display:grid;
+      grid-template-columns:240px 1fr;
+      gap:var(--gap);
+      padding:16px;
+      align-items:start;
+    }
+
+    /* Sidebar */
+    nav{background:var(--card);border-radius:var(--card-radius);padding:12px;min-height:120px}
+    nav h2{font-size:16px;margin:0 0 10px 0}
+    nav ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+    nav li{
+      padding:10px;border-radius:8px;cursor:pointer;font-size:15px;
+      user-select:none;
+    }
+    nav li:hover{background:#1f2a49}
+
+    /* Movie grid */
+    .movies{
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+      gap:var(--gap);
+    }
+
+    .card{
+      background:var(--card);border-radius:var(--card-radius);overflow:hidden;cursor:pointer;
+      display:flex;flex-direction:column;transition:transform 0.15s, box-shadow 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .card:active{transform:scale(0.995)}
+    .card:hover{transform:translateY(-4px)}
+
+    /* Thumbnail: gebruik aspect-ratio zodat beeld altijd consistent blijft.
+       Pas max-height aan voor kleinere devices zodat ico/cover kleiner wordt */
+    .card img{
+      width:100%;
+      height:auto;
+      aspect-ratio:16/9;
+      object-fit:cover;
+      display:block;
+    }
+
+    .card .info{padding:10px}
+    .card .info h3{
+      margin:0;font-size:15px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    }
+
+    /* Player overlay - responsive */
+    .player{
+      position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);
+      display:none;align-items:center;justify-content:center;flex-direction:column;z-index:1000;padding:20px;
+    }
+    .player .media-wrap{
+      width:95%;max-width:1000px;background:transparent;
+      border-radius:12px;display:flex;align-items:center;justify-content:center;
+    }
+    /* iframe / video responsive using aspect-ratio */
+    .player iframe, .player video{
+      width:100%;
+      height:auto;
+      aspect-ratio:16/9;
+      border-radius:10px;
+      display:block;
+      max-height:80vh;
+    }
+    .closeBtn{margin-top:14px;padding:10px 18px;border:none;border-radius:8px;background:var(--accent);color:#000;font-weight:700;cursor:pointer}
+
+    /* kleine scherm optimalisaties - verklein thumbnails, 1 kolom, menu als overlay */
+    @media (max-width: 900px){
+      .container{grid-template-columns:1fr;padding:12px;gap:10px}
+      nav{position:fixed;top:64px;left:12px;right:12px;z-index:999;display:none;padding:12px}
+      nav.show{display:block}
+      .brand h1{font-size:16px}
+      .brand img{width:36px;height:36px}
+      .movies{grid-template-columns:repeat(auto-fill, minmax(140px, 1fr))}
+      .card .info h3{font-size:14px}
+      .hamburger{font-size:24px;padding:8px}
+    }
+
+    @media (max-width:480px){
+      header{padding:10px}
+      .brand img{width:32px;height:32px}
+      .brand h1{font-size:15px}
+      .card img{aspect-ratio: 4/3; /* iets minder hoog op heel kleine schermen */ }
+      .movies{grid-template-columns:repeat(2,1fr);gap:8px}
+      .card .info{padding:8px}
+      .card .info h3{font-size:13px}
+      .closeBtn{padding:10px 14px}
+    }
+
+    /* extra: focus styles for accessibility */
+    button:focus, nav li:focus {outline:2px solid #06b6d4;outline-offset:3px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <!-- voeg hier je icoon toe (favicon of logo) -->
+      <img src="https://od.lk/s/NzJfNDc2NjA1NTRf/turistv.png?random=1" alt="logo">
+      <h1>Turis Tv</h1>
+    </div>
+    <div>
+      <button class="hamburger" aria-expanded="false" aria-controls="sideMenu" onclick="toggleMenu()" title="Menu">☰</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <nav id="sideMenu" aria-hidden="true">
+      <h2>Categorieën</h2>
+      <ul>
+        <li tabindex="0" onclick="filterMovies('all');toggleMenu()">Hepsi</li>
+        <li tabindex="0" onclick="filterMovies('ulusal');toggleMenu()">Ulusal</li>
+        <li tabindex="0" onclick="filterMovies('haber');toggleMenu()">Haber</li>
+        <li tabindex="0" onclick="filterMovies('spor');toggleMenu()">Spor</li>
+        <li tabindex="0" onclick="filterMovies('belgesel');toggleMenu()">Belgesel</li>
+        <li tabindex="0" onclick="filterMovies('muzik');toggleMenu()">Muzik</li>
+        <li tabindex="0" onclick="filterMovies('film');toggleMenu()">Film</li>
+        <li tabindex="0" onclick="filterMovies('cocuk');toggleMenu()">Çocuk</li>
+        <li tabindex="0" onclick="filterMovies('youtube');toggleMenu()">YouTube Playlist</li>
+      </ul>
+    </nav>
+
+    <main>
+      <div class="movies" id="movieGrid" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <div class="player" id="player" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="media-wrap" id="playerContent"></div>
+    <button class="closeBtn" onclick="closePlayer()">Kapat ✖</button>
+  </div>
+
+  <!-- HLS.js -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script>
+    /* (Ik heb jouw movie array onveranderd overgenomen — je kunt die hieronder bijwerken) */
+    const movies = [
+      { title:"TRT 1", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://tv-trt1.medya.trt.com.tr/master.m3u8" },
+      { title:"ATV", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv.m3u8" },
+      { title:"KANAL D", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://ackaxsqacw.turknet.ercdn.net/ozfkfbbjba/kanald/kanald.m3u8" },
+      { title:"STAR TV", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://emmazbvkkf.turknet.ercdn.net/cnifuowzza/startv/startv.m3u8" },
+      { title:"SHOW TV", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/showtv/showtv.m3u8" },
+      { title:"NOW TV", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://uycyyuuzyh.turknet.ercdn.net/nphindgytw/nowtv/nowtv.m3u8" },
+      { title:"TV 8 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://rkhubpaomb.turknet.ercdn.net/fwjkgpasof/tv8/tv8.m3u8" },
+      { title:"TV 8,5", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://rkhubpaomb.turknet.ercdn.net/fwjkgpasof/tv8bucuk/tv8bucuk.m3u8" },
+      { title:"A2", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8" },
+      { title:"TABII TV", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://ceokzokgtd.erbvr.com/tabiitv/tabiitv.m3u8" },
+      { title:"TEVE 2", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://ackaxsqacw.turknet.ercdn.net/ozfkfbbjba/teve2/teve2.m3u8" },
+      { title:"KANAL 7 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://yurhnwtpys.turknet.ercdn.net/cvmbjbpmdx/kanal7/kanal7.m3u8" },
+      { title:"SHOWMAX", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/showmax/showmax.m3u8" },
+      { title:"BEYAZ TV", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://beyaztv-live.daioncdn.net/beyaztv/beyaztv.m3u8" },
+      { title:"TV 360", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://turkmedya-live.ercdn.net/tv360/tv360.m3u8" },
+      { title:"TRT TÛRK", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://tv-trtturk.medya.trt.com.tr/master.m3u8" },
+      { title:"TRT AVAZ", cover:"https://od.lk/s/NzJfNDc2NjA0NTVf/ulusal.png?random=1", category:"ulusal", url:"https://tv-trtavaz.medya.trt.com.tr/master.m3u8" },
+  
+
+      { title:"CNN TV", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"http://116.202.238.88/CNNTURK_TR/index.m3u8" },
+      { title:"SÔZCÛ TV", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"https://izle.canlitvapp.com/sozcu/index.m3u8" },
+      { title:"HALK TV", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"https://halktv-live.daioncdn.net/halktv/halktv.m3u8" },
+      { title:"TELE 1", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"https://tele1-live.ercdn.net/tele1/tele1.m3u8" },
+      { title:"FLASHABER", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"https://flashhaber-live.ercdn.net/flashhaber/flashhaber.m3u8" },
+      { title:"NTV", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"https://dogus-live.daioncdn.net/ntv/ntv_720p.m3u8" },
+      { title:"BLOOMBERGHT", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"https://bloomberght-live.daioncdn.net/bloomberght/bloomberght.m3u8" },
+      { title:"EKOL TV", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"https://ekoltv-live.ercdn.net/ekoltv/ekoltv.m3u8" },
+      { title:"HABER GLOBAL", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"https://ensonhaber-live.ercdn.net/haberglobal/haberglobal.m3u8" },
+      { title:"TRT HABER", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"https://tv-trthaber.medya.trt.com.tr/master.m3u8" },
+      { title:"HABER TÛRK", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/haberturktv/haberturktv.m3u8" },
+      { title:"TV 100", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"https://tv100-live.daioncdn.net/tv100/tv100.m3u8" },
+      { title:"TV 24", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"https://tv.ensonhaber.com/tv24/tv24_1080p.m3u8" },
+      { title:"TV 24 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTJf/haber1.png?random=1", category:"haber", url:"https://turkmedya-live.ercdn.net/tv24/tv24.m3u8" },
+ 
+
+
+      { title:"BEIN SPORT 1", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/sbeinsports-1/playlist.m3u8" },
+      { title:"BEIN SPORT 2 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/sbeinsports-2/playlist.m3u8" },
+      { title:"BEIN SPORT 3 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/sbeinsports-3/playlist.m3u8" },
+      { title:"BEIN SPORT 4 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/sbeinsports-4/playlist.m3u8" },
+      { title:"BEIN SPORT 5 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/sbeinsports-5/playlist.m3u8" },
+      { title:"SPORT MAX 1 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/sbeinsportsmax-1/playlist.m3u8" },
+      { title:"SPORT MAX 2", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/sbeinsportsmax-2/playlist.m3u8" },
+      { title:" TIVIBU 1", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/stivibuspor-1/playlist.m3u8" },
+      { title:"  TIVIBU 2", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/stivibuspor-2/playlist.m3u8" },
+      { title:" TIVIBU 3 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/stivibuspor-3/playlist.m3u8" },
+      { title:" TIVIBU 4 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/stivibuspor-4/playlist.m3u8" },
+      { title:"S SPOR ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/sssport/playlist.m3u8" },
+      { title:"S SPOR 1 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/sssport2/playlist.m3u8" },
+      { title:"S SPOR 2 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/sssport2/playlist.m3u8" },
+      { title:"S SPOR +1 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/sssplus1/playlist.m3u8" },
+      { title:"S SPOR +2 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/sssplus2/playlist.m3u8" },
+      { title:"SMART 1 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/ssmartspor/playlist.m3u8" },
+      { title:"SMART 2 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/ssmartspor2/playlist.m3u8" },
+      { title:"EUROSPORT 1 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/seurosport1/playlist.m3u8" },
+      { title:"EUROSPORT 2 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/seurosport2/playlist.m3u8" },
+      { title:"A SPOR ", cover:"https://od.lk/s/NzJfNDc2NjA0NTRf/spor.png?random=1", category:"spor", url:"https://one.b2a7fa109ef84a6f.click/live/saspor/playlist.m3u8" },
+
+      { title:"TLC", cover:"https://od.lk/s/NzJfNDc2NjA1MTJf/belgesel.png?random=1", category:"belgesel", url:"https://emmazbvkkf.turknet.ercdn.net/cnifuowzza/tlc/tlc.m3u8" },
+      { title:"DMAX", cover:"https://od.lk/s/NzJfNDc2NjA1MTJf/belgesel.png?random=1", category:"belgesel", url:"https://emmazbvkkf.turknet.ercdn.net/cnifuowzza/dmax/dmax.m3u8" },
+      { title:"TRT BELGESEL", cover:"https://od.lk/s/NzJfNDc2NjA1MTJf/belgesel.png?random=1", category:"belgesel", url:"https://tv-trtbelgesel.medya.trt.com.tr/master.m3u8" },
+      { title:"TARIH TV ", cover:"https://od.lk/s/NzJfNDc2NjA1MTJf/belgesel.png?random=1", category:"belgesel", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/tarihtv.m3u8" },
+      { title:"BBC ", cover:"https://od.lk/s/NzJfNDc2NjA1MTJf/belgesel.png?random=1", category:"belgesel", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/bbc.m3u8" },
+      { title:"VIASATHISTORY", cover:"https://od.lk/s/NzJfNDc2NjA1MTJf/belgesel.png?random=1", category:"belgesel", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/viasathistory.m3u8" },
+      { title:"VIASATEXPLORE", cover:"https://od.lk/s/NzJfNDc2NjA1MTJf/belgesel.png?random=1", category:"belgesel", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/viasatexplore.m3u8" },
+      { title:"HISTORY ", cover:"https://od.lk/s/NzJfNDc2NjA1MTJf/belgesel.png?random=1", category:"belgesel", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/history.m3u8" },
+      { title:"DISCOVERY ", cover:"https://od.lk/s/NzJfNDc2NjA1MTJf/belgesel.png?random=1", category:"belgesel", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/discovery.m3u8" },
+      { title:"NATGEO", cover:"https://od.lk/s/NzJfNDc2NjA1MTJf/belgesel.png?random=1", category:"belgesel", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/natgeo.m3u8" },
+      { title:"NATGEO WILD ", cover:"https://od.lk/s/NzJfNDc2NjA1MTJf/belgesel.png?random=1", category:"belgesel", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/natgeowild.m3u8" },
+
+
+      { title:"TRT MÛZIK", cover:"https://od.lk/s/NzJfNDc2NjA0NTNf/muzik.png?random=1", category:"muzik", url:"https://tv-trtmuzik.medya.trt.com.tr/master.m3u8" },
+      { title:"NR1 TÛRK ", cover:"https://od.lk/s/NzJfNDc2NjA0NTNf/muzik.png?random=1", category:"muzik", url:"https://listen.powerapp.com.tr/pturktaptaze/taptaze.smil/playlist.m3u8" },
+      { title:"POWER", cover:"https://od.lk/s/NzJfNDc2NjA0NTNf/muzik.png?random=1", category:"muzik", url:"https://livetv.powerapp.com.tr/powerTV/powerhd.smil/playist.m3u8" },
+      { title:"POWER TÛRK", cover:"https://od.lk/s/NzJfNDc2NjA0NTNf/muzik.png?random=1", category:"muzik", url:"https://listen.powerapp.com.tr/pturkakustik/akustik.smil/playlist.m3u8" },
+      { title:"DREAMTÛRK", cover:"https://od.lk/s/NzJfNDc2NjA0NTNf/muzik.png?random=1", category:"muzik", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://live.duhnet.tv/S2/HLS_LIVE/dreamturknp/playlist.m3u8" },
+ 
+
+      { title:"MOVIE SMART TÛRK", cover:"https://od.lk/s/NzJfNDc2NjA0NTFf/film.png?random=1", category:"film", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/mvturk.m3u8" },
+      { title:"SINEMA AILE 2 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTFf/film.png?random=1", category:"film", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/sinemaaile2.m3u8" },
+      { title:"SINEMA AKSIYON ", cover:"https://od.lk/s/NzJfNDc2NjA0NTFf/film.png?random=1", category:"film", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/sinemaaksiyon.m3u8" },
+      { title:"SINEMA AKSIYON 2 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTFf/film.png?random=1", category:"film", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/sinemaaksiyon2.m3u8" },
+      { title:"SINEMA KOMEDI", cover:"https://od.lk/s/NzJfNDc2NjA0NTFf/film.png?random=1", category:"film", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbslive/sinemakomedi.m3u8" },
+      { title:"BEINMOVIE SMART ", cover:"https://od.lk/s/NzJfNDc2NjA0NTFf/film.png?random=1", category:"film", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/bsstars.m3u8" },
+      { title:"BEINMOVIE TÛRK ", cover:"https://od.lk/s/NzJfNDc2NjA0NTFf/film.png?random=1", category:"film", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/bsturk.m3u8" },
+      { title:"BEINMOVIE PREMIERE 1  ", cover:"https://od.lk/s/NzJfNDc2NjA0NTFf/film.png?random=1", category:"film", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/bspremier1.m3u8" },
+      { title:"BEINMOVIE FAMILY ", cover:"https://od.lk/s/NzJfNDc2NjA0NTFf/film.png?random=1", category:"film", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/bsfamily.m3u8" },
+      { title:"BOXOFFICE 1 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTFf/film.png?random=1", category:"film", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/box1.m3u8" },
+      { title:"BOXOFFICE 2 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTFf/film.png?random=1", category:"film", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/box2.m3u8" },
+      { title:"BOXOFFICE 3 ", cover:"https://od.lk/s/NzJfNDc2NjA0NTFf/film.png?random=1", category:"film", url:"https://ancient-shape-c20a.yedekbirkankam.workers.dev/https://tv1.arectv30.sbs/live/box3.m3u8" },
+ 
+
+
+      { title:"MINIKA COCUK", cover:"https://od.lk/s/NzJfNDc2NjA0NDlf/cocuk.png?random=1", category:"cocuk", url:"https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago_cocuk/minikago_cocuk.m3u8" },
+      { title:"MINIKA GO", cover:"https://od.lk/s/NzJfNDc2NjA0NDlf/cocuk.png?random=1", category:"cocuk", url:"https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago.m3u8" },
+      { title:"CARTOON NETWORK", cover:"https://od.lk/s/NzJfNDc2NjA0NDlf/cocuk.png?random=1", category:"cocuk", url:"https://tv.arectv34.sbs/live/cartoonnetwork.m3u8" },
+      { title:"TRT ÇOCUK", cover:"https://od.lk/s/NzJfNDc2NjA0NDlf/cocuk.png?random=1", category:"cocuk", url:"https://tv-trtcocuk.medya.trt.com.tr/master.m3u8" },
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+      /* ... (behoud al je items hier, ik heb voor de voorbeeldigheid maar enkele laten zien) ... */
+
+
+
+      { title:"CNN TÜRK ", cover:"https://od.lk/s/NzJfNDc2NjA0NDZf/youtube.png", category:"youtube", url:"https://www.youtube.com/watch?v=6N8_r2uwLEc" },
+      { title:"Evlerinin Önü Yoldur Yolaktır", cover:"https://od.lk/s/NzJfNDc2NjA0NDZf/youtube.png", category:"youtube", url:"https://www.youtube.com/watch?v=JjTeViaVdoI" },
+      { title:"Kar Yağar Kar Üstüne", cover:"https://od.lk/s/NzJfNDc2NjA0NDZf/youtube.png", category:"youtube", url:"https://www.youtube.com/watch?v=qaxtyajdjmc" },
+      { title:"Makaram Sarı Bağlar ", cover:"https://od.lk/s/NzJfNDc2NjA0NDZf/youtube.png", category:"youtube", url:"https://www.youtube.com/watch?v=c1h68yMxb3I" },
+      { title:"Ne Güzel Yaratmış", cover:"https://od.lk/s/NzJfNDc2NjA0NDZf/youtube.png", category:"youtube", url:"https://www.youtube.com/watch?v=1O00V1XmxXw" },
+      { title:"Çamlar Altında", cover:"https://od.lk/s/NzJfNDc2NjA0NDZf/youtube.png", category:"youtube", url:"https://www.youtube.com/watch?v=WD014Ym7Zno" },
+      { title:"İyi günün dostu", cover:"https://od.lk/s/NzJfNDc2NjA0NDZf/youtube.png", category:"youtube", url:"https://www.youtube.com/watch?v=woJh8kBmJ20" },
+      { title:"O Yar Gelir", cover:"https://od.lk/s/NzJfNDc2NjA0NDZf/youtube.png", category:"youtube", url:"https://www.youtube.com/watch?v=MqV55hD0Sv4" },
+      { title:"Emminem", cover:"https://od.lk/s/NzJfNDc2NjA0NDZf/youtube.png", category:"youtube", url:"https://www.youtube.com/watch?v=byUuAxjfP2M" },
+
+      { title:"Gangnam Style", cover:"https://od.lk/s/NzJfNDc2NjA0NDZf/youtube.png", category:"youtube", url:"https://www.youtube.com/watch?v=JjTeViaVdoI" },
+
+      { title:"Lorke Lorke", cover:"https://od.lk/s/NzJfNDc2NjA0NDZf/youtube.png", category:"youtube", url:"https://www.youtube.com/watch?v=Mwu43X40PgE" }
+    ];
+
+    const grid = document.getElementById('movieGrid');
+    const player = document.getElementById('player');
+    const playerContent = document.getElementById('playerContent');
+    const sideMenu = document.getElementById('sideMenu');
+    const hamburger = document.querySelector('.hamburger');
+    let hls;
+
+    function renderMovies(list){
+      grid.innerHTML='';
+      list.forEach(m=>{
+        const div=document.createElement('div');
+        div.className='card';
+        div.innerHTML=`
+          <img src="${m.cover}" alt="${m.title}">
+          <div class="info"><h3 title="${m.title}">${m.title}</h3></div>
+        `;
+        div.onclick=()=> openPlayer(m);
+        div.onkeydown = (e) => { if(e.key === 'Enter' || e.key === ' ') openPlayer(m) };
+        grid.appendChild(div);
+      });
+    }
+
+    function filterMovies(cat){
+      if(cat==='all') renderMovies(movies);
+      else renderMovies(movies.filter(m=>m.category===cat));
+    }
+
+    function openPlayer(movie){
+      player.style.display='flex';
+      player.setAttribute('aria-hidden','false');
+      playStream(movie.url);
+      // zorg dat menu sluit op mobiel
+      sideMenu.classList.remove('show');
+      hamburger.setAttribute('aria-expanded','false');
+    }
+
+    function closePlayer(){
+      player.style.display='none';
+      player.setAttribute('aria-hidden','true');
+      if(hls){hls.destroy();hls=null;}
+      playerContent.innerHTML = "";
+    }
+
+    function playStream(url){
+      playerContent.innerHTML = "";
+
+      if(url.includes("youtube.com") || url.includes("youtu.be")){
+        const videoId = extractYoutubeId(url);
+        // responsive iframe
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('src', `https://www.youtube.com/embed/${videoId}?autoplay=1`);
+        iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+        iframe.setAttribute('allowfullscreen', '');
+        playerContent.appendChild(iframe);
+      } else {
+        const video = document.createElement("video");
+        video.controls = true;
+        video.playsInline = true;
+        playerContent.appendChild(video);
+
+        if(hls){hls.destroy();hls=null;}
+        if(video.canPlayType('application/vnd.apple.mpegurl')){
+          video.src=url;
+          video.play().catch(()=>{});
+        } else if(Hls.isSupported()){
+          hls = new Hls();
+          hls.loadSource(url);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, ()=> video.play().catch(()=>{}));
+        } else {
+          alert("HLS wordt niet ondersteund in deze browser.");
+        }
+      }
+    }
+
+    function extractYoutubeId(url){
+      let id = "";
+      if(url.includes("youtube.com/watch?v=")){
+        id = url.split("v=")[1].split("&")[0];
+      } else if(url.includes("youtu.be/")){
+        id = url.split("youtu.be/")[1].split("?")[0];
+      } else {
+        // fallback: laatste deel
+        const parts = url.split('/');
+        id = parts[parts.length-1].split('?')[0];
+      }
+      return id;
+    }
+
+    function toggleMenu(){
+      const isShown = sideMenu.classList.toggle("show");
+      sideMenu.setAttribute('aria-hidden', !isShown);
+      hamburger.setAttribute('aria-expanded', isShown);
+    }
+
+    // init
+    renderMovies(movies);
+  </script>
+</body>
+</html>

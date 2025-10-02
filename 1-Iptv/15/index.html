@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>IPTV Online Speler</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      margin: 0;
+    }
+    header {
+      background: #222;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      font-size: 20px;
+    }
+    nav {
+      display: none;
+      flex-direction: column;
+      background: #333;
+    }
+    nav a {
+      color: #fff;
+      padding: 10px;
+      text-decoration: none;
+    }
+    nav a:hover {
+      background: #444;
+    }
+    .hamburger {
+      cursor: pointer;
+      font-size: 24px;
+    }
+    .player-container {
+      max-width: 800px;
+      width: 100%;
+      margin: 20px auto;
+      padding: 0 10px;
+    }
+    video {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      background: #000;
+    }
+    .channel {
+      display: flex;
+      align-items: center;
+      margin-top: 15px;
+    }
+    .channel img {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-right: 12px;
+    }
+    .dropdown {
+      margin-top: 15px;
+      background: #222;
+      padding: 8px;
+      border-radius: 6px;
+    }
+    .dropdown select {
+      width: 100%;
+      padding: 6px;
+      border-radius: 4px;
+      border: none;
+    }
+    @media (min-width: 768px) {
+      nav {
+        display: flex !important;
+        flex-direction: row;
+        background: none;
+      }
+      .hamburger {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <nav id="navMenu">
+      <a href="#">Home</a>
+      <a href="#">Kanalen</a>
+      <a href="#">Info</a>
+    </nav>
+  </header>
+
+  <div class="player-container">
+    <video id="video" controls autoplay></video>
+
+    <div class="channel">
+      <img id="channelLogo" src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Logo-sample.png" alt="Kanaal Logo">
+      <span id="channelName">Voorbeeld Kanaal</span>
+    </div>
+
+    <div class="dropdown">
+      <label for="channelSelect">Kies een kanaal:</label>
+      <select id="channelSelect">
+        <option value="https://tv-trt1.medya.trt.com.tr/master.m3u8" data-logo="https://od.lk/s/NzJfNDYwMjg5Njhf/%2B18%20-%20kopie.jpg">TRT 1</option>
+        <option value="https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv.m3u8" data-logo="https://od.lk/s/NzJfNDYwMjg5MTFf/ASR%20SERIF1.jpg">ATV</option>
+        <option value="https://emmazbvkkf.turknet.ercdn.net/cnifuowzza/startv/startv.m3u8" data-logo="https://od.lk/s/NzJfNDYwMjg5MjFf/COCUKLARA%20OZEL1.jpg">STAR TV</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- HLS.js -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script>
+    const video = document.getElementById('video');
+    const channelSelect = document.getElementById('channelSelect');
+    const channelLogo = document.getElementById('channelLogo');
+    const channelName = document.getElementById('channelName');
+    let hls;
+
+    function loadStream(url, logo, name) {
+      if (hls) {
+        hls.destroy();
+      }
+      if (Hls.isSupported()) {
+        hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+      }
+      channelLogo.src = logo;
+      channelName.textContent = name;
+    }
+
+    channelSelect.addEventListener('change', function() {
+      const selectedOption = channelSelect.options[channelSelect.selectedIndex];
+      loadStream(selectedOption.value, selectedOption.dataset.logo, selectedOption.text);
+    });
+
+    // start met eerste kanaal
+    const firstOption = channelSelect.options[0];
+    loadStream(firstOption.value, firstOption.dataset.logo, firstOption.text);
+
+    function toggleMenu() {
+      const navMenu = document.getElementById('navMenu');
+      navMenu.style.display = navMenu.style.display === 'flex' ? 'none' : 'flex';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPTV Online</title>
+  <link href="https://cdn.jsdelivr.net/npm/video.js/dist/video-js.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/video.js/dist/video.min.js"></script>
+  <style>
+
+
+
+.player {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+}
+
+#videoPlayer {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+}
+
+
+
+.channels {
+  display: flex;
+  flex-direction: column;   /* maak er een verticale lijst van */
+  gap: 15px;
+  padding: 0 15px 40px;
+  max-height: 300px;        /* hoogte instellen */
+  overflow-y: auto;         /* scrollen inschakelen */
+}
+.channel {
+  background: #1c1c1c;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  display: flex;            /* thumbnail + titel naast elkaar */
+  align-items: center;
+}
+.channel img {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+}
+.channel div {
+  padding: 10px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+}
+
+
+
+
+
+
+
+.player {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+}
+
+#videoPlayer {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+}
+
+
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f0f0f;
+      color: white;
+    }
+    header {
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 28px;
+      margin: 0;
+    }
+    p {
+      color: #aaa;
+      margin: 5px 0 15px;
+    }
+    .player {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .channels {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      padding: 0 15px 40px;
+    }
+    .channel {
+      background: #1c1c1c;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .channel:hover {
+      transform: scale(1.03);
+    }
+    .channel img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      display: block;
+    }
+    .channel div {
+      padding: 10px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .play-icon {
+      color: #3b82f6;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+ 
+  </header>
+
+  <!-- Player -->
+  <div class="player">
+    <video
+      id="videoPlayer"
+      class="video-js vjs-big-play-centered"
+      controls
+      autoplay
+      preload="auto"
+      width="100%"
+      height="360"
+      style="max-width: 800px; border-radius: 12px;"
+    >
+      <source src="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" type="application/x-mpegURL">
+    </video>
+  </div>
+
+  <!-- Channels -->
+  <div class="channels">
+    <div class="channel" onclick="changeChannel('https://tv-trt1.medya.trt.com.tr/master.m3u8')">
+      <img src="https://via.placeholder.com/300x180?text=Sports" alt="Sports">
+      <div>trt <span class="play-icon">▶</span></div>
+    </div>
+    <div class="channel" onclick="changeChannel('https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8')">
+      <img src="https://via.placeholder.com/300x180?text=News" alt="News">
+      <div>News 24 <span class="play-icon">▶</span></div>
+    </div>
+    <div class="channel" onclick="changeChannel('https://test-streams.mux.dev/test_001/stream.m3u8')">
+      <img src="https://via.placeholder.com/300x180?text=Movies" alt="Movies">
+      <div>Movies HD <span class="play-icon">▶</span></div>
+    </div>
+  </div>
+
+  <script>
+    function changeChannel(url) {
+      var player = videojs('videoPlayer');
+      player.src({ src: url, type: 'application/x-mpegURL' });
+      player.play();
+    }
+  </script>
+
+</body>
+</html>
